@@ -1,0 +1,13 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #000; /* Fondo negro como el juego original */
+    margin: 0;
+}
+
+#gameCanvas {
+    background-color: #111; /* Un gris oscuro para el fondo del juego inicialmente */
+    border: 1px solid #fff; /* Un borde para visualizar el canvas */
+}
