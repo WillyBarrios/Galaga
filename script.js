@@ -7,7 +7,21 @@ playerImage.src = 'assets/player.png';
 
 const enemyImage = new Image();
 enemyImage.src = 'assets/enemy.png';
+playerImage.onload = () => {
+    console.log("Imagen del jugador cargada correctamente.");
+};
 
+enemyImage.onload = () => {
+    console.log("Imagen del enemigo cargada correctamente.");
+};
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth * 0.9;
+    canvas.height = window.innerHeight * 0.8;
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); // Llamar la función al inicio
 // --- Jugador ---
 const player = {
     x: canvas.width / 2 - 16,
@@ -28,7 +42,7 @@ const projectileHeight = 10;
 const projectileColor = 'lime';
 
 // --- Enemigos ---
-const enemies = [];
+let enemies = [];
 const enemyWidth = 32;
 const enemyHeight = 32;
 const enemySpeedXRandom = 0.5;
@@ -207,7 +221,27 @@ function draw() {
     // Dibujar los enemigos
     drawEnemies();
 }
+document.getElementById('leftBtn').addEventListener('mousedown', () => {
+    keys['ArrowLeft'] = true;
+});
+document.getElementById('leftBtn').addEventListener('mouseup', () => {
+    keys['ArrowLeft'] = false;
+});
 
+document.getElementById('rightBtn').addEventListener('mousedown', () => {
+    keys['ArrowRight'] = true;
+});
+document.getElementById('rightBtn').addEventListener('mouseup', () => {
+    keys['ArrowRight'] = false;
+});
+
+document.getElementById('shootBtn').addEventListener('click', () => {
+    shoot();
+});
+canvas.addEventListener('touchmove', (event) => {
+    const touchX = event.touches[0].clientX;
+    player.x = touchX - player.width / 2;
+});
 function gameLoop() {
     update();
     draw();

@@ -11,3 +11,16 @@ body {
     background-color: #111; /* Un gris oscuro para el fondo del juego inicialmente */
     border: 1px solid #fff; /* Un borde para visualizar el canvas */
 }
+#mobileControls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+}
+
+button {
+    padding: 15px;
+    font-size: 20px;
+}
