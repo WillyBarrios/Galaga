@@ -73,7 +73,7 @@ function spawnEnemyGroup() {
 function updateEnemies() {
     console.log("Entrando a updateEnemies()");
     console.log("Estado de enemies al entrar:", enemies);
-    if (enemies.length > 0) { // Añadimos esta condición
+    if (enemies.length > 0) { // 
         for (const enemy of enemies) {
             if (enemy.alive) {
                 enemy.x += enemy.speedX;
@@ -141,6 +141,40 @@ function checkCollision(rectA, rectB) {
     );
 }
 
+// --- Disparos de Enemigos ---
+const enemyProjectiles = [];
+const enemyProjectileSpeed = 5;
+const enemyProjectileWidth = 4;
+const enemyProjectileHeight = 10;
+const enemyProjectileColor = 'red';
+let enemyShootTimer = 0;
+let baseEnemyShootInterval = 120; // Intervalo base de disparo
+let minEnemyShootInterval = 30; // Intervalo mínimo de disparo
+let gameTime = 0; // Contador de tiempo de juego
+
+function enemyShoot(enemy) {
+    const newProjectile = {
+        x: enemy.x + enemy.width / 2 - enemyProjectileWidth / 2,
+        y: enemy.y + enemy.height,
+        width: enemyProjectileWidth,
+        height: enemyProjectileHeight,
+        color: enemyProjectileColor,
+        speedY: enemyProjectileSpeed
+    };
+    enemyProjectiles.push(newProjectile);
+}
+
+function updateEnemyProjectiles() {
+    for (let i = 0; i < enemyProjectiles.length; i++) {
+        enemyProjectiles[i].y += enemyProjectiles[i].speedY;
+        if (enemyProjectiles[i].y > canvas.height) {
+            enemyProjectiles.splice(i, 1);
+            i--;
+        }
+    }
+}
+
+// Modificar la función handleCollisions para incluir colisiones con disparos enemigos
 function handleCollisions() {
     for (let i = 0; i < playerProjectiles.length; i++) {
         const projectile = playerProjectiles[i];
@@ -164,9 +198,72 @@ function handleCollisions() {
             // Aquí iría la lógica para la pérdida de vidas, fin del juego, etc.
         }
     }
+
+    // Comprobar colisiones de disparos enemigos con el jugador
+    for (let i = 0; i < enemyProjectiles.length; i++) {
+        const projectile = enemyProjectiles[i];
+        if (checkCollision(projectile, player)) {
+            console.log("¡El jugador ha sido alcanzado!");
+            enemyProjectiles.splice(i, 1);
+            i--;
+            // Aquí puedes agregar lógica de daño al jugador
+        }
+    }
 }
 
-// --- Bucle del Juego ---
+// Modificar la función draw para dibujar los disparos enemigos
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Dibujar al jugador
+    ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
+
+    // Dibujar los disparos
+    ctx.fillStyle = projectileColor;
+    for (const projectile of playerProjectiles) {
+        ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
+    }
+
+    // Dibujar los disparos enemigos
+    ctx.fillStyle = enemyProjectileColor;
+    for (const projectile of enemyProjectiles) {
+        ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
+    }
+
+    // Dibujar los enemigos
+    drawEnemies();
+}
+document.getElementById('leftBtn').addEventListener('mousedown', () => {
+    keys['ArrowLeft'] = true;
+});
+document.getElementById('leftBtn').addEventListener('mouseup', () => {
+    keys['ArrowLeft'] = false;
+});
+
+document.getElementById('rightBtn').addEventListener('mousedown', () => {
+    keys['ArrowRight'] = true;
+});
+document.getElementById('rightBtn').addEventListener('mouseup', () => {
+    keys['ArrowRight'] = false;
+});
+
+document.getElementById('shootBtn').addEventListener('click', () => {
+    shoot();
+});
+canvas.addEventListener('touchmove', (event) => {
+    const touchX = event.touches[0].clientX;
+    player.x = touchX - player.width / 2;
+});
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// --- Inicialización ---
+gameLoop();
+
+// Modificar la función update para incluir la lógica de disparo enemigo
 function update() {
     console.log("Función update() ejecutándose");
     // Movimiento del jugador
@@ -204,49 +301,28 @@ function update() {
 
     // Comprobar colisiones
     handleCollisions();
-}
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Incrementar el tiempo de juego
+    gameTime++;
 
-    // Dibujar al jugador
-    ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
+    // Calcular el intervalo de disparo actual basado en el tiempo de juego
+    const currentShootInterval = Math.max(
+        minEnemyShootInterval,
+        baseEnemyShootInterval - Math.floor(gameTime / 600) * 10
+    );
 
-    // Dibujar los disparos
-    ctx.fillStyle = projectileColor;
-    for (const projectile of playerProjectiles) {
-        ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
+    // Lógica de disparo enemigo
+    enemyShootTimer++;
+    if (enemyShootTimer >= currentShootInterval) {
+        // Seleccionar un enemigo aleatorio para disparar
+        const aliveEnemies = enemies.filter(enemy => enemy.alive);
+        if (aliveEnemies.length > 0) {
+            const randomEnemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+            enemyShoot(randomEnemy);
+        }
+        enemyShootTimer = 0;
     }
 
-    // Dibujar los enemigos
-    drawEnemies();
+    // Actualizar proyectiles enemigos
+    updateEnemyProjectiles();
 }
-document.getElementById('leftBtn').addEventListener('mousedown', () => {
-    keys['ArrowLeft'] = true;
-});
-document.getElementById('leftBtn').addEventListener('mouseup', () => {
-    keys['ArrowLeft'] = false;
-});
-
-document.getElementById('rightBtn').addEventListener('mousedown', () => {
-    keys['ArrowRight'] = true;
-});
-document.getElementById('rightBtn').addEventListener('mouseup', () => {
-    keys['ArrowRight'] = false;
-});
-
-document.getElementById('shootBtn').addEventListener('click', () => {
-    shoot();
-});
-canvas.addEventListener('touchmove', (event) => {
-    const touchX = event.touches[0].clientX;
-    player.x = touchX - player.width / 2;
-});
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-// --- Inicialización ---
-gameLoop();
