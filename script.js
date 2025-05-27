@@ -124,9 +124,65 @@ function drawMainMenu() {
     ctx.font = '24px Arial';
     ctx.fillText('Presiona ESPACIO para comenzar', canvas.width / 2, canvas.height / 2);
     ctx.fillText('Presiona C para ver los créditos', canvas.width / 2, canvas.height / 2 + 40);
+    
+    // Agregar los botones táctiles
+    // Botón de Inicio
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.fillRect(canvas.width / 4, canvas.height * 0.6, canvas.width / 2, 50);
+    ctx.fillStyle = 'white';
+    ctx.font = '24px Arial';
+    ctx.fillText('INICIAR JUEGO', canvas.width / 2, canvas.height * 0.6 + 35);
+
+    // Botón de Créditos
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.fillRect(canvas.width / 4, canvas.height * 0.7, canvas.width / 2, 50);
+    ctx.fillStyle = 'white';
+    ctx.fillText('CRÉDITOS', canvas.width / 2, canvas.height * 0.7 + 35);
 }
 
-// Función para dibujar los créditos
+// Agregar manejo táctil para el botón de retorno en créditos
+// Modificar el event listener de touchstart para incluir los botones del menú
+canvas.addEventListener('touchstart', (event) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+    const touchY = touch.clientY - rect.top;
+
+    if (currentGameState === GAME_STATE.MENU) {
+        // Verificar toque en botón de inicio
+        if (touchX >= canvas.width / 4 && 
+            touchX <= canvas.width * 3 / 4 &&
+            touchY >= canvas.height * 0.6 &&
+            touchY <= canvas.height * 0.6 + 50) {
+            currentGameState = GAME_STATE.PLAYING;
+            // Reiniciar variables del juego
+            enemies = [];
+            playerProjectiles = [];
+            enemyProjectiles = [];
+            enemySpawnTimer = 0;
+            gameTime = 0;
+            player.x = canvas.width / 2 - player.width / 2;
+        }
+        // Verificar toque en botón de créditos
+        else if (touchX >= canvas.width / 4 && 
+                 touchX <= canvas.width * 3 / 4 &&
+                 touchY >= canvas.height * 0.7 &&
+                 touchY <= canvas.height * 0.7 + 50) {
+            currentGameState = GAME_STATE.CREDITS;
+        }
+    } else if (currentGameState === GAME_STATE.CREDITS) {
+        // Verificar toque en botón de retorno
+        if (touchX >= canvas.width / 4 && 
+            touchX <= canvas.width * 3 / 4 &&
+            touchY >= canvas.height * 0.8 &&
+            touchY <= canvas.height * 0.8 + 50) {
+            currentGameState = GAME_STATE.MENU;
+        }
+    }
+});
+
+// Agregar botón de retorno en la pantalla de créditos
 function drawCredits() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -143,6 +199,12 @@ function drawCredits() {
     
     ctx.font = '18px Arial';
     ctx.fillText('Presiona ESC para volver al menú', canvas.width / 2, canvas.height - 50);
+    // Botón de retorno
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.fillRect(canvas.width / 4, canvas.height * 0.8, canvas.width / 2, 50);
+    ctx.fillStyle = 'white';
+    ctx.font = '24px Arial';
+    ctx.fillText('VOLVER AL MENÚ', canvas.width / 2, canvas.height * 0.8 + 35);
 }
 
 // Modificar el event listener del teclado

@@ -1,17 +1,49 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galaga Web</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Galaga</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: black;
+            height: 100vh;
+            touch-action: none;
+        }
+        
+        #gameCanvas {
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 24px;
+            touch-action: none;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <div id="mobileControls">
-        <button id="leftBtn">⬅️</button>
-        <button id="shootBtn">🔥</button>
-        <button id="rightBtn">➡️</button>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+        <button id="leftBtn" class="control-btn">←</button>
+        <button id="shootBtn" class="control-btn">🔫</button>
+        <button id="rightBtn" class="control-btn">→</button>
     </div>
     <script src="script.js"></script>
 </body>
