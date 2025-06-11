@@ -11,10 +11,10 @@ let currentGameState = GAME_STATE.MENU;
 
 // --- Assets ---
 const playerImage = new Image();
-playerImage.src = 'assets/player.png';
+playerImage.src = 'assets/Diseño sin título/1.png';
 
 const enemyImage = new Image();
-enemyImage.src = 'assets/enemy.png';
+enemyImage.src = 'assets/Diseño sin título/nivel 1.png';
 playerImage.onload = () => {
     console.log("Imagen del jugador cargada correctamente.");
 };
