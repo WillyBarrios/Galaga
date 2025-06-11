@@ -193,9 +193,9 @@ function drawCredits() {
     ctx.fillText('CRÉDITOS', canvas.width / 2, canvas.height / 4);
     
     ctx.font = '24px Arial';
-    ctx.fillText('Desarrollado por: [Willy Barrios]', canvas.width / 2, canvas.height / 2 - 40);
-    ctx.fillText('Diseño de Juego: [Willy Barrios]', canvas.width / 2, canvas.height / 2);
-    ctx.fillText('Programación: [Willy Barrios]', canvas.width / 2, canvas.height / 2 + 40);
+    ctx.fillText('Desarrollado por: [Willy Barrios, Dorian Ortega y Jocias]', canvas.width / 2, canvas.height / 2 - 40);
+    ctx.fillText('Diseño de Juego: [Willy Barrios, Dorian Ortega y Jocias]', canvas.width / 2, canvas.height / 2);
+    ctx.fillText('Programación: [Willy Barrios, Dorian Ortega, y Jocias]', canvas.width / 2, canvas.height / 2 + 40);
     
     ctx.font = '18px Arial';
     ctx.fillText('Presiona ESC para volver al menú', canvas.width / 2, canvas.height - 50);
@@ -236,7 +236,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 
-// Mantener solo esta versión completa del gameLoop
+// Mantener esta versión completa del gameLoop, no la modifiquen 
 function gameLoop() {
     if (currentGameState === GAME_STATE.MENU) {
         drawMainMenu();
@@ -312,7 +312,7 @@ function updateEnemyProjectiles() {
     }
 }
 
-// Modificar la función handleCollisions para incluir colisiones con disparos enemigos
+// Modifique la función handleCollisions para incluir colisiones con disparos enemigos
 function handleCollisions() {
     for (let i = 0; i < playerProjectiles.length; i++) {
         const projectile = playerProjectiles[i];
@@ -333,7 +333,7 @@ function handleCollisions() {
             console.log("¡Colisión con el jugador!");
             enemies.splice(i, 1); // Eliminar al enemigo al colisionar con el jugador
             i--;
-            // Aquí iría la lógica para la pérdida de vidas, fin del juego, etc.
+            // Aquí iría la lógica para la pérdida de vidas, fin del juego, etc, esto falta que realizarlo
         }
     }
 

@@ -1,17 +1,10 @@
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #000; /* Fondo negro como el juego original */
-    margin: 0;
-}
+
 
 #gameCanvas {
     background-color: #111; /* Un gris oscuro para el fondo del juego inicialmente */
     border: 1px solid #fff; /* Un borde para visualizar el canvas */
 }
-#mobileControls {
+.controls {
     position: fixed;
     bottom: 20px;
     left: 50%;
@@ -20,7 +13,32 @@ body {
     gap: 20px;
 }
 
-button {
-    padding: 15px;
-    font-size: 20px;
+
+
+body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: black;
+    height: 100vh;
+    touch-action: none;
+}
+
+.controls {
+    position: fixed;
+    bottom: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.control-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 24px;
+    touch-action: none;
 }
