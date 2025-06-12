@@ -4,8 +4,8 @@ export function increaseLevel(state) {
 
     // Aumentar velocidad de enemigos
     state.enemies.forEach(enemy => {
-        enemy.speedX *= 1.2;
-        enemy.speedY *= 1.2;
+        enemy.speedX *= 0.001;
+        enemy.speedY *= 0.001;
     });
 
     // Reducir intervalo de disparo enemigo

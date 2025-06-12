@@ -30,6 +30,7 @@ export function updatePowerUps(state) {
             powerUp.active &&
             checkCollision(powerUp, state.player)
         ) {
+            console.log("✅ Power-up recogido:", powerUp.type); 
             applyPowerUpEffect(state, powerUp);
             powerUp.active = false;
         }
