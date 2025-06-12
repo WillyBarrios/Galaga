@@ -15,7 +15,7 @@ export function checkCollision(rectA, rectB) {
 }
 
 // Lógica de colisiones principal
-export function handleCollisions(state, { onPlayerHit, onEnemyDestroyed }) {
+export function handleCollisions(state, { onPlayerHit, onEnemyDestroyed } = {}) {
     const { player, enemies, playerProjectiles, enemyProjectiles } = state;
 
     // Disparos del jugador contra enemigos
@@ -31,25 +31,27 @@ export function handleCollisions(state, { onPlayerHit, onEnemyDestroyed }) {
                 break;
             }
         }
-    }   
-
-    // Enemigos colisionando con el jugador
-    for (let i = 0; i < enemies.length; i++) {
-        const enemy = enemies[i];
-        if (enemy.alive && checkCollision(enemy, player)) {
-            enemies.splice(i, 1);
-            i--;
-            if (onPlayerHit) onPlayerHit();
-        }
     }
 
-    // Disparos enemigos contra el jugador
+    // Disparos enemigos contra jugador
     for (let i = 0; i < enemyProjectiles.length; i++) {
         const projectile = enemyProjectiles[i];
         if (checkCollision(projectile, player)) {
             enemyProjectiles.splice(i, 1);
             i--;
             if (onPlayerHit) onPlayerHit();
+            break;
+        }
+    }
+    // Enemigos colisionan con el jugador
+
+    for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+        if (enemy.alive && checkCollision(enemy, player)) {
+            enemy.alive = false; // opcional: eliminar al enemigo al chocar
+            if (onPlayerHit) onPlayerHit();
+            break; // salimos después de una colisión
         }
     }
 }
+

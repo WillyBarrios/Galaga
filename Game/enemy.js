@@ -50,10 +50,18 @@ export function updateEnemies(canvasWidth, canvasHeight, state) {
     state.enemies = state.enemies.filter(enemy => enemy.alive);
 }
 
-export function drawEnemies(ctx, enemyImage, state) {
+export const enemyImage = new Image();
+enemyImage.src = 'assets/Diseño sin título/nivel 1.png';
+enemyImage.onload = () => {
+    console.log("✅ Imagen de enemigo cargada.");
+};
+
+export function drawEnemies(ctx, state) {
     for (const enemy of state.enemies) {
         if (enemy.alive) {
             ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
         }
     }
 }
+
+

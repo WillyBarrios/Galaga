@@ -1,21 +1,25 @@
 // main.js
-
+import {
+    increaseLevel
+} from './Game/level.js';
 import {
     GAME_STATE,
     drawMainMenu,
     drawCredits,
     drawGameOver,
-    startGame
+    startGame,
+    checkLevelProgress
 } from './Game/ui.js';
 
 import {
-    handleCollisions 
+    handleCollisions
 } from './Game/collisions.js';
 
 import {
     spawnEnemyGroup,
     updateEnemies,
-    drawEnemies
+    drawEnemies,
+    enemyImage
 } from './Game/enemy.js';
 
 import {
@@ -39,27 +43,37 @@ import {
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth * 0.9;
-    canvas.height = window.innerHeight * 0.8;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+canvas.width = window.innerWidth * 0.9;
+canvas.height = window.innerHeight * 0.8;
+const keys = {};
+document.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
 
-const playerImage = new Image();
-playerImage.src = 'assets/Diseño sin título/1.png';
-const enemyImage = new Image();
-enemyImage.src = 'assets/Diseño sin título/nivel 1.png';
+    if (state.currentGameState === GAME_STATE.MENU && e.key === ' ') {
+        startGame(state);
+    } else if (state.currentGameState === GAME_STATE.CREDITS && e.key === 'Escape') {
+        state.currentGameState = GAME_STATE.MENU;
+    } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
+        startGame(state);
+    } else if (state.currentGameState === GAME_STATE.PLAYING && e.key === ' ') {
+        shoot(state);
+    }
+});
 
-initPlayer(canvas);
+document.addEventListener('keyup', (e) => {
+    keys[e.key] = false;
+});
 
-const state = {
+export const state = {
     currentGameState: GAME_STATE.MENU,
     playerLives: 3,
     score: 0,
+    level: 1,
     gameTime: 0,
     enemySpawnTimer: 0,
     enemyShootTimer: 0,
+    baseEnemyShootInterval: 60,
+    enemySpawnInterval: 120,
     canvas: canvas,
     ctx: ctx,
     player: player,
@@ -67,67 +81,14 @@ const state = {
     enemyProjectiles: enemyProjectiles,
     enemies: [],
     isPaused: false,
-    pauseTimer: 0
+    pauseTimer: 0,
+    enemyImage: enemyImage,
+    ctx: ctx
 };
 
-const keys = {};
-let spaceHold = false;
-
-document.addEventListener('keydown', (e) => {
-    if (state.currentGameState === GAME_STATE.MENU) {
-        if (e.key === ' ') {
-            startGame(state);
-        } else if (e.key.toLowerCase() === 'c') {
-            state.currentGameState = GAME_STATE.CREDITS;
-        }
-    } else if (state.currentGameState === GAME_STATE.CREDITS) {
-        if (e.key === 'Escape') {
-            state.currentGameState = GAME_STATE.MENU;
-        }
-    } else if (state.currentGameState === GAME_STATE.GAME_OVER) {
-        if (e.key === ' ') {
-            startGame(state);
-        }
-    } else if (state.currentGameState === GAME_STATE.PLAYING) {
-        keys[e.key] = true;
-        if (e.key === ' ' && !spaceHold) {
-            shoot(state.player);
-            spaceHold = true;
-        }
-    }
-});
-
-document.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
-    if (e.key === ' ') {
-        spaceHold = false;
-    }
-});
-
-document.getElementById('leftBtn').addEventListener('mousedown', () => {
-    keys['ArrowLeft'] = true;
-});
-document.getElementById('leftBtn').addEventListener('mouseup', () => {
-    keys['ArrowLeft'] = false;
-});
-
-document.getElementById('rightBtn').addEventListener('mousedown', () => {
-    keys['ArrowRight'] = true;
-});
-document.getElementById('rightBtn').addEventListener('mouseup', () => {
-    keys['ArrowRight'] = false;
-});
-
-document.getElementById('shootBtn').addEventListener('click', () => {
-    shoot(state.player);
-});
-
-canvas.addEventListener('touchmove', (event) => {
-    const touchX = event.touches[0].clientX;
-    state.player.x = touchX - state.player.width / 2;
-});
-
 function update() {
+    movePlayer(keys, state.canvas);
+
     if (state.isPaused) {
         state.pauseTimer--;
         if (state.pauseTimer <= 0) {
@@ -135,69 +96,66 @@ function update() {
         }
         return;
     }
-    console.log("Frame update, enemigos:", state.enemies.length);
 
-    movePlayer(keys, canvas);
-    updatePlayerProjectiles(canvas);
-    updateEnemies(canvas.width, canvas.height, state);
+    movePlayer(state);
+
+    updatePlayerProjectiles(state);
+    updateEnemies(canvas.width, canvas.height, state); 
+
+    updateEnemyProjectiles(state);
+
+    handleCollisions(state, {
+        onPlayerHit: () => {
+          state.playerLives--;
+          console.log("💥 Jugador alcanzado. Vidas restantes:", state.playerLives);
+      
+          if (state.playerLives <= 0) {
+            state.currentGameState = GAME_STATE.GAME_OVER;
+          } else {
+            state.isPaused = true;
+            state.pauseTimer = 60; // pausa breve antes de seguir
+          }
+        },
+        onEnemyDestroyed: () => {
+          state.score += 100;
+        }
+      });
+      
 
     state.enemySpawnTimer++;
-    if (state.enemySpawnTimer >= 120) {
-        spawnEnemyGroup(canvas.width, canvas.height, state);
+    if (state.enemySpawnTimer >= state.enemySpawnInterval) {
+        spawnEnemyGroup(state.canvas.width, state.canvas.height, state);
         state.enemySpawnTimer = 0;
     }
 
-    handleCollisions(state,{
-        onPlayerHit: () => {
-            console.log("\u00a1El jugador ha sido alcanzado!");
-            state.playerLives--;
-            state.isPaused = true;
-            state.pauseTimer = 60;
-            if (state.playerLives <= 0) {
-                state.currentGameState = GAME_STATE.GAME_OVER;
-            }
-        },
-        onEnemyDestroyed: () => {
-            state.score += 100;
-        }
-    });
-
-    state.gameTime++;
-
-    const currentShootInterval = Math.max(
-        10,
-        60 - Math.floor(state.gameTime / 600) * 5
-    );
-
     state.enemyShootTimer++;
-    if (state.enemyShootTimer >= currentShootInterval) {
-        const aliveEnemies = state.enemies.filter(enemy => enemy.alive);
+    if (state.enemyShootTimer >= state.baseEnemyShootInterval) {
+        const aliveEnemies = state.enemies.filter(e => e.alive);
         if (aliveEnemies.length > 0) {
-            const shooters = aliveEnemies.sort(() => 0.5 - Math.random()).slice(0, 3);
-            shooters.forEach(enemy => {
-                enemyShoot(enemy);
-            });
+            const randomEnemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+            enemyShoot(randomEnemy, state);
         }
         state.enemyShootTimer = 0;
     }
 
-    updateEnemyProjectiles(canvas);
+    state.gameTime++;
+
+    checkLevelProgress(state);
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawPlayer(ctx, playerImage);
-    drawPlayerProjectiles(ctx);
-    drawEnemyProjectiles(ctx);
-    drawEnemies(ctx, enemyImage, state);
+    drawPlayer(state.ctx, state.player);
+    drawPlayerProjectiles(state);
+    drawEnemyProjectiles(state.ctx, state); 
+    drawEnemies(state.ctx,state);
 
     ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
-    ctx.fillText(`Vidas: ${state.playerLives}`, 10, 20);
-    ctx.fillText(`Puntos: ${state.score}`, 10, 40);
-    ctx.fillText(`Enemigos vivos: ${state.enemies.filter(e => e.alive).length}`, 10, 60);
-    ctx.fillText(`Total en array: ${state.enemies.length}`, 10, 80);
+    ctx.font = '18px Arial';
+    ctx.fillText(`Puntos: ${state.score}`, 60, 20);
+    ctx.fillText(`Vidas: ${state.playerLives}`, 60, 40);
+    ctx.fillText(`Nivel: ${state.level}`, 60, 60);
 }
 
 function gameLoop() {
@@ -207,13 +165,49 @@ function gameLoop() {
         drawCredits(ctx, canvas);
     } else if (state.currentGameState === GAME_STATE.GAME_OVER) {
         drawGameOver(ctx, canvas);
-    } else if (state.currentGameState === GAME_STATE.PLAYING) {
+    } else {
         update();
         draw();
     }
-    requestAnimationFrame(gameLoop);
-    console.log("Estado:", state.currentGameState);
+    console.log("Estado actual:", state.currentGameState);
 
+    requestAnimationFrame(gameLoop);
 }
+
+document.addEventListener('keydown', (e) => {
+    if (state.currentGameState === GAME_STATE.MENU) {
+        if (e.key === ' ') {
+            startGame(state);
+        } else if (e.key.toLowerCase() === 'c') {
+            state.currentGameState = GAME_STATE.CREDITS;
+        }
+    } else if (state.currentGameState === GAME_STATE.CREDITS && e.key === 'Escape') {
+        state.currentGameState = GAME_STATE.MENU;
+    } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
+        startGame(state);
+    } else if (state.currentGameState === GAME_STATE.PLAYING) {
+        if (e.key === ' ') {
+            shoot(state);
+        }
+    }
+});
+
+canvas.addEventListener('touchstart', (event) => {
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+    const touchY = touch.clientY - rect.top;
+
+    if (state.currentGameState === GAME_STATE.MENU) {
+        if (
+            touchX >= canvas.width / 4 &&
+            touchX <= canvas.width * 3 / 4 &&
+            touchY >= canvas.height * 0.6 &&
+            touchY <= canvas.height * 0.6 + 50
+        ) {
+            startGame(state);
+        }
+    }
+});
 
 gameLoop();

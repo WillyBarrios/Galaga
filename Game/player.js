@@ -1,16 +1,19 @@
 // player.js
+const playerImage = new Image();
+playerImage.src = 'assets/Diseño sin título/1.png';
 
 export const player = {
     x: 0, // se inicializa en main.js para adaptarse al tamaño del canvas
     y: 0,
     width: 32,
     height: 32,
-    speed: 5
+    speed: 5,
+    image: playerImage
 };
 
 export function initPlayer(canvas) {
     player.x = canvas.width / 2 - player.width / 2;
-    player.y = canvas.height - 50;
+    player.y = canvas.height - player.height - 20;
 }
 
 export function movePlayer(keys, canvas) {
@@ -26,6 +29,12 @@ export function movePlayer(keys, canvas) {
     }
 }
 
-export function drawPlayer(ctx, playerImage) {
-    ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
+export function drawPlayer(ctx, player) {
+    if (player.image instanceof HTMLImageElement && player.image.complete) {
+        ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
+    } else {
+        console.warn("⛔ Imagen del jugador no es válida todavía.");
+    }
 }
+
+

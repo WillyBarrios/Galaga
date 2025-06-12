@@ -6,7 +6,8 @@ export const projectileWidth = 4;
 export const projectileHeight = 10;
 export const projectileColor = 'lime';
 
-export function shoot(player) {
+export function shoot(state) {
+    const player = state.player;
     const newProjectile = {
         x: player.x + player.width / 2 - projectileWidth / 2,
         y: player.y,
@@ -15,20 +16,22 @@ export function shoot(player) {
         color: projectileColor,
         speedY: projectileSpeed
     };
-    playerProjectiles.push(newProjectile);
+    state.playerProjectiles.push(newProjectile);
 }
 
-export function updatePlayerProjectiles(canvas) {
-    for (let i = 0; i < playerProjectiles.length; i++) {
-        playerProjectiles[i].y += playerProjectiles[i].speedY;
-        if (playerProjectiles[i].y < 0) {
-            playerProjectiles.splice(i, 1);
+
+export function updatePlayerProjectiles(state) {
+    for (let i = 0; i < state.playerProjectiles.length; i++) {
+        state.playerProjectiles[i].y += state.playerProjectiles[i].speedY;
+        if (state.playerProjectiles[i].y < 0) {
+            state.playerProjectiles.splice(i, 1);
             i--;
         }
     }
 }
 
-export function drawPlayerProjectiles(ctx) {
+export function drawPlayerProjectiles(state) {
+    const ctx = state.ctx;
     ctx.fillStyle = projectileColor;
     for (const projectile of playerProjectiles) {
         ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
@@ -54,20 +57,19 @@ export function enemyShoot(enemy) {
     enemyProjectiles.push(newProjectile);
 }
 
-export function updateEnemyProjectiles(canvas) {
-    for (let i = 0; i < enemyProjectiles.length; i++) {
-        enemyProjectiles[i].y += enemyProjectiles[i].speedY;
-        if (enemyProjectiles[i].y > canvas.height) {
-            enemyProjectiles.splice(i, 1);
+export function updateEnemyProjectiles(state) {
+    for (let i = 0; i < state.enemyProjectiles.length; i++) {
+        state.enemyProjectiles[i].y += state.enemyProjectiles[i].speedY;
+        if (state.enemyProjectiles[i].y > state.canvas.height) {
+            state.enemyProjectiles.splice(i, 1);
             i--;
         }
     }
 }
 
-export function drawEnemyProjectiles(ctx) {
-    ctx.fillStyle = enemyProjectileColor;
-    for (const projectile of enemyProjectiles) {
+export function drawEnemyProjectiles(ctx, state) {
+    ctx.fillStyle = 'red';
+    for (const projectile of state.enemyProjectiles) {
         ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
     }
 }
-
