@@ -13,7 +13,6 @@ import {
 } from './Game/collisions.js';
 
 import {
-    enemies,
     spawnEnemyGroup,
     updateEnemies,
     drawEnemies
@@ -66,7 +65,7 @@ const state = {
     player: player,
     playerProjectiles: playerProjectiles,
     enemyProjectiles: enemyProjectiles,
-    enemies: enemies,
+    enemies: [],
     isPaused: false,
     pauseTimer: 0
 };
@@ -136,23 +135,24 @@ function update() {
         }
         return;
     }
+    console.log("Frame update, enemigos:", state.enemies.length);
 
     movePlayer(keys, canvas);
     updatePlayerProjectiles(canvas);
-    updateEnemies(canvas.width, canvas.height);
+    updateEnemies(canvas.width, canvas.height, state);
 
     state.enemySpawnTimer++;
     if (state.enemySpawnTimer >= 120) {
-        spawnEnemyGroup(canvas.width, canvas.height);
+        spawnEnemyGroup(canvas.width, canvas.height, state);
         state.enemySpawnTimer = 0;
     }
 
-    handleCollisions({
+    handleCollisions(state,{
         onPlayerHit: () => {
             console.log("\u00a1El jugador ha sido alcanzado!");
             state.playerLives--;
             state.isPaused = true;
-            state.pauseTimer = 60; // 1 segundo
+            state.pauseTimer = 60;
             if (state.playerLives <= 0) {
                 state.currentGameState = GAME_STATE.GAME_OVER;
             }
@@ -165,16 +165,18 @@ function update() {
     state.gameTime++;
 
     const currentShootInterval = Math.max(
-        30,
-        120 - Math.floor(state.gameTime / 600) * 10
+        10,
+        60 - Math.floor(state.gameTime / 600) * 5
     );
 
     state.enemyShootTimer++;
     if (state.enemyShootTimer >= currentShootInterval) {
         const aliveEnemies = state.enemies.filter(enemy => enemy.alive);
         if (aliveEnemies.length > 0) {
-            const randomEnemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
-            enemyShoot(randomEnemy);
+            const shooters = aliveEnemies.sort(() => 0.5 - Math.random()).slice(0, 3);
+            shooters.forEach(enemy => {
+                enemyShoot(enemy);
+            });
         }
         state.enemyShootTimer = 0;
     }
@@ -188,12 +190,14 @@ function draw() {
     drawPlayer(ctx, playerImage);
     drawPlayerProjectiles(ctx);
     drawEnemyProjectiles(ctx);
-    drawEnemies(ctx, enemyImage);
+    drawEnemies(ctx, enemyImage, state);
 
     ctx.fillStyle = 'white';
     ctx.font = '16px Arial';
-    ctx.fillText(`Vidas: ${state.playerLives}`, 35 , 20);
-    ctx.fillText(`Puntos: ${state.score}`, 35, 40);
+    ctx.fillText(`Vidas: ${state.playerLives}`, 10, 20);
+    ctx.fillText(`Puntos: ${state.score}`, 10, 40);
+    ctx.fillText(`Enemigos vivos: ${state.enemies.filter(e => e.alive).length}`, 10, 60);
+    ctx.fillText(`Total en array: ${state.enemies.length}`, 10, 80);
 }
 
 function gameLoop() {
@@ -203,11 +207,13 @@ function gameLoop() {
         drawCredits(ctx, canvas);
     } else if (state.currentGameState === GAME_STATE.GAME_OVER) {
         drawGameOver(ctx, canvas);
-    } else {
+    } else if (state.currentGameState === GAME_STATE.PLAYING) {
         update();
         draw();
     }
     requestAnimationFrame(gameLoop);
+    console.log("Estado:", state.currentGameState);
+
 }
 
 gameLoop();

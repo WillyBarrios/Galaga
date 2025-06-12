@@ -1,5 +1,5 @@
 // ui.js
-
+import { spawnEnemyGroup } from './enemy.js';
 export const GAME_STATE = {
     MENU: 'menu',
     CREDITS: 'credits',
@@ -65,4 +65,5 @@ export function startGame(state) {
     state.playerProjectiles.length = 0;
     state.enemyProjectiles.length = 0;
     state.enemies.length = 0;
+    spawnEnemyGroup(state.canvas.width, state.canvas.height); // ← IMPORTANTE
 }

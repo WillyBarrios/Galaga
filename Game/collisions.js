@@ -1,7 +1,7 @@
 // collisions.js
 
 import { player } from './player.js';
-import { enemies } from './enemy.js';
+
 import { playerProjectiles, enemyProjectiles } from './projectile.js';
 
 // Función general para checar colisiones entre dos rectángulos
@@ -15,7 +15,9 @@ export function checkCollision(rectA, rectB) {
 }
 
 // Lógica de colisiones principal
-export function handleCollisions({ onPlayerHit, onEnemyDestroyed }) {
+export function handleCollisions(state, { onPlayerHit, onEnemyDestroyed }) {
+    const { player, enemies, playerProjectiles, enemyProjectiles } = state;
+
     // Disparos del jugador contra enemigos
     for (let i = 0; i < playerProjectiles.length; i++) {
         const projectile = playerProjectiles[i];

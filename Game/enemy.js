@@ -1,37 +1,43 @@
 // enemy.js
+
 export const enemyWidth = 32;
 export const enemyHeight = 32;
-export const enemySpeedXRandom = 0.5;
-export const enemySpeedYRandom = 0.5;
+export const enemySpeedXRandom = 1.5;
+export const enemySpeedYRandom = 1.0;
 
-export let enemies = [];
+export function spawnEnemyGroup(canvasWidth, canvasHeight, state) {
+    const groupSize = 5;
+    const minSpeed = 0.5;
 
-export function spawnEnemyGroup(canvasWidth, canvasHeight) {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < groupSize; i++) {
         const randomX = Math.random() * (canvasWidth - enemyWidth);
         const randomY = Math.random() * (canvasHeight * 0.3);
-        const speedX = (Math.random() - 0.5) * 2 * enemySpeedXRandom;
-        const speedY = Math.random() * enemySpeedYRandom;
+        let speedX = (Math.random() - 0.5) * 2 * enemySpeedXRandom;
+        let speedY = Math.random() * enemySpeedYRandom;
 
-        enemies.push({
+        // Asegurar que no estén estáticos
+        if (Math.abs(speedX) < minSpeed) speedX = minSpeed * Math.sign(speedX || 1);
+        if (Math.abs(speedY) < minSpeed) speedY = minSpeed;
+
+        state.enemies.push({
             x: randomX,
             y: randomY,
             width: enemyWidth,
             height: enemyHeight,
             alive: true,
-            speedX: speedX,
-            speedY: speedY
+            speedX,
+            speedY
         });
     }
 }
 
-export function updateEnemies(canvasWidth, canvasHeight) {
-    for (const enemy of enemies) {
+export function updateEnemies(canvasWidth, canvasHeight, state) {
+    for (const enemy of state.enemies) {
         if (enemy.alive) {
             enemy.x += enemy.speedX;
             enemy.y += enemy.speedY;
 
-            if (enemy.x < 0 || enemy.x + enemyWidth > canvasWidth) {
+            if (enemy.x < 0 || enemy.x + enemy.width > canvasWidth) {
                 enemy.speedX *= -1;
             }
             if (enemy.y > canvasHeight) {
@@ -40,11 +46,12 @@ export function updateEnemies(canvasWidth, canvasHeight) {
         }
     }
 
-    enemies = enemies.filter(enemy => enemy.alive);
+    // Elimina los muertos
+    state.enemies = state.enemies.filter(enemy => enemy.alive);
 }
 
-export function drawEnemies(ctx, enemyImage) {
-    for (const enemy of enemies) {
+export function drawEnemies(ctx, enemyImage, state) {
+    for (const enemy of state.enemies) {
         if (enemy.alive) {
             ctx.drawImage(enemyImage, enemy.x, enemy.y, enemy.width, enemy.height);
         }
