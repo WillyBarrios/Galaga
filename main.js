@@ -3,6 +3,10 @@ import {
     increaseLevel
 } from './Game/level.js';
 import {
+     updatePowerUps, drawPowerUps
+     } from './Game/powerups.js';
+
+import {
     GAME_STATE,
     drawMainMenu,
     drawCredits,
@@ -83,11 +87,16 @@ export const state = {
     isPaused: false,
     pauseTimer: 0,
     enemyImage: enemyImage,
-    ctx: ctx
+    ctx: ctx,
+    isInvulnerable: false,
+    tripleShot: false,
+    superMove: false
+
 };
 
 function update() {
     movePlayer(keys, state.canvas);
+    updatePowerUps(state);
 
     if (state.isPaused) {
         state.pauseTimer--;
@@ -150,6 +159,7 @@ function draw() {
     drawPlayerProjectiles(state);
     drawEnemyProjectiles(state.ctx, state); 
     drawEnemies(state.ctx,state);
+    drawPowerUps(state.ctx, state);
 
     ctx.fillStyle = 'white';
     ctx.font = '18px Arial';

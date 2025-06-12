@@ -1,5 +1,5 @@
 // ui.js
-
+import { maybeSpawnPowerUpForLevel } from './powerups.js';
 export const GAME_STATE = {
     MENU: 'menu',
     CREDITS: 'credits',
@@ -97,5 +97,9 @@ export function checkLevelProgress(state) {
 
         state.baseEnemyShootInterval = Math.max(10, 60 - state.level * 5);
         state.enemySpawnInterval = Math.max(30, 120 - state.level * 10);
+
+        maybeSpawnPowerUpForLevel(state);
     }
+
+
 }
