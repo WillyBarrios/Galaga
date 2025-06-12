@@ -192,8 +192,8 @@ function draw() {
 
     ctx.fillStyle = 'white';
     ctx.font = '16px Arial';
-    ctx.fillText(`Vidas: ${state.playerLives}`, 10, 20);
-    ctx.fillText(`Puntos: ${state.score}`, 10, 40);
+    ctx.fillText(`Vidas: ${state.playerLives}`, 35 , 20);
+    ctx.fillText(`Puntos: ${state.score}`, 35, 40);
 }
 
 function gameLoop() {
