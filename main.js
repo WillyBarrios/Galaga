@@ -181,7 +181,7 @@ function draw() {
     ctx.font = '16px Arial';
 
     if (state.powerUpTimers.invulnerability > 0) {
-        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 60, yOffset);
+        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 60, yOffset); // Cambiar aqui la ubicacion de los carteles
         yOffset += 20;
     }
     if (state.powerUpTimers.tripleShot > 0) {

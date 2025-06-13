@@ -84,7 +84,7 @@ export function shootTriple(state) {
             y: player.y,
             width: projectileWidth,
             height: projectileHeight,
-            color: projectileColor,
+            color: projectileColor, //Cambiar el color despues
             speedY: projectileSpeed
         });
     }
