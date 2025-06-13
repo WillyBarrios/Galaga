@@ -41,7 +41,7 @@ export function updatePowerUps(state) {
             powerUp.active &&
             checkCollision(powerUp, state.player)
         ) {
-            console.log("✅ Power-up recogido:", powerUp.type); 
+            console.log("✅ Power-up recogido:", powerUp.type);
             applyPowerUpEffect(state, powerUp);
             powerUp.active = false;
         }
@@ -50,6 +50,28 @@ export function updatePowerUps(state) {
     for (let i = powerUps.length - 1; i >= 0; i--) {
         if (!powerUps[i].active) powerUps.splice(i, 1);
     }
+    if (state.powerUpTimers.invulnerability > 0) {
+    state.powerUpTimers.invulnerability--;
+    if (state.powerUpTimers.invulnerability === 0) {
+        state.isInvulnerable = false;
+    }
+}
+
+if (state.powerUpTimers.tripleShot > 0) {
+    state.powerUpTimers.tripleShot--;
+    if (state.powerUpTimers.tripleShot === 0) {
+        state.tripleShot = false;
+    }
+}
+
+if (state.powerUpTimers.superMove > 0) {
+    state.powerUpTimers.superMove--;
+    if (state.powerUpTimers.superMove === 0) {
+        state.superMove = false;
+        state.isInvulnerable = false;
+    }
+}
+
 }
 
 export function drawPowerUps(ctx) {
@@ -65,7 +87,7 @@ export function drawPowerUps(ctx) {
     }
 }
 
-
+/*
 function getColorForPowerUp(type) {
     switch (type) {
         case POWERUP_TYPES.INVULNERABILITY: return 'gold';
@@ -73,7 +95,7 @@ function getColorForPowerUp(type) {
         case POWERUP_TYPES.SUPER_MOVE: return 'purple';
         case POWERUP_TYPES.SCORE: return 'white';
     }
-}
+}*/
 
 function applyPowerUpEffect(state, powerUp) {
     console.log("✅ Power-up recogido:", powerUp.type);
@@ -84,19 +106,16 @@ function applyPowerUpEffect(state, powerUp) {
     switch (powerUp.type) {
         case POWERUP_TYPES.INVULNERABILITY:
             state.isInvulnerable = true;
-            setTimeout(() => state.isInvulnerable = false, 60000);
+            state.powerUpTimers.invulnerability = 600;
             break;
         case POWERUP_TYPES.TRIPLE_SHOT:
             state.tripleShot = true;
-            setTimeout(() => state.tripleShot = false, 120000);
+            state.powerUpTimers.tripleShot = 1200;
             break;
         case POWERUP_TYPES.SUPER_MOVE:
             state.superMove = true;
             state.isInvulnerable = true;
-            setTimeout(() => {
-                state.superMove = false;
-                state.isInvulnerable = false;
-            }, 120000);
+            state.powerUpTimers.superMove = 1200;
             break;
         case POWERUP_TYPES.SCORE:
             state.score += 250;
@@ -113,7 +132,7 @@ function checkCollision(a, b) {
         a.y + a.height > b.y
     );
 }
- export function maybeSpawnPowerUpForLevel(state) {
+export function maybeSpawnPowerUpForLevel(state) {
     let type = null;
     if (state.level === 5) type = POWERUP_TYPES.INVULNERABILITY;
     else if (state.level === 10) type = POWERUP_TYPES.TRIPLE_SHOT;

@@ -87,7 +87,7 @@ export function startGame(state) {
 }
 
 export function checkLevelProgress(state) {
-    const scoreThreshold = state.level * 100;
+    const scoreThreshold = state.level * 1000;
     if (state.score >= scoreThreshold) {
         state.level++;
         console.log(`🔼 Nivel subido a ${state.level}`);

@@ -3,8 +3,8 @@ import {
     increaseLevel
 } from './Game/level.js';
 import {
-     updatePowerUps, drawPowerUps
-     } from './Game/powerups.js';
+    updatePowerUps, drawPowerUps
+} from './Game/powerups.js';
 
 import {
     GAME_STATE,
@@ -60,11 +60,11 @@ document.addEventListener('keydown', (e) => {
     } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
         startGame(state);
     } else if (state.currentGameState === GAME_STATE.PLAYING && e.key === ' ') {
-       if (state.tripleShot) {
-        shootTriple(state);
-    } else {
-        shoot(state);
-    }
+        if (state.tripleShot) {
+            shootTriple(state);
+        } else {
+            shoot(state);
+        }
     }
 });
 
@@ -94,16 +94,20 @@ export const state = {
     ctx: ctx,
     isInvulnerable: false,
     tripleShot: false,
-    superMove: false
-
+    superMove: false,
+    powerUpTimers: {
+        invulnerability: 0,
+        tripleShot: 0,
+        superMove: 0
+    }
 };
 
 function update() {
-movePlayer(keys, {
-    player: state.player,
-    canvas: state.canvas,
-    superMove: state.superMove
-});
+    movePlayer(keys, {
+        player: state.player,
+        canvas: state.canvas,
+        superMove: state.superMove
+    });
 
     updatePowerUps(state);
 
@@ -116,27 +120,27 @@ movePlayer(keys, {
     }
 
     updatePlayerProjectiles(state);
-    updateEnemies(canvas.width, canvas.height, state); 
+    updateEnemies(canvas.width, canvas.height, state);
 
     updateEnemyProjectiles(state);
 
     handleCollisions(state, {
         onPlayerHit: () => {
-          state.playerLives--;
-          console.log("💥 Jugador alcanzado. Vidas restantes:", state.playerLives);
-      
-          if (state.playerLives <= 0) {
-            state.currentGameState = GAME_STATE.GAME_OVER;
-          } else {
-            state.isPaused = true;
-            state.pauseTimer = 60; // pausa breve antes de seguir
-          }
+            state.playerLives--;
+            console.log("💥 Jugador alcanzado. Vidas restantes:", state.playerLives);
+
+            if (state.playerLives <= 0) {
+                state.currentGameState = GAME_STATE.GAME_OVER;
+            } else {
+                state.isPaused = true;
+                state.pauseTimer = 60; // pausa breve antes de seguir
+            }
         },
         onEnemyDestroyed: () => {
-          state.score += 100;
+            state.score += 100;
         }
-      });
-      
+    });
+
 
     state.enemySpawnTimer++;
     if (state.enemySpawnTimer >= state.enemySpawnInterval) {
@@ -164,8 +168,8 @@ function draw() {
 
     drawPlayer(state.ctx, state.player);
     drawPlayerProjectiles(state);
-    drawEnemyProjectiles(state.ctx, state); 
-    drawEnemies(state.ctx,state);
+    drawEnemyProjectiles(state.ctx, state);
+    drawEnemies(state.ctx, state);
     drawPowerUps(state.ctx, state);
 
     ctx.fillStyle = 'white';
@@ -173,6 +177,22 @@ function draw() {
     ctx.fillText(`Puntos: ${state.score}`, 60, 20);
     ctx.fillText(`Vidas: ${state.playerLives}`, 60, 40);
     ctx.fillText(`Nivel: ${state.level}`, 60, 60);
+    let yOffset = 80;
+    ctx.font = '16px Arial';
+
+    if (state.powerUpTimers.invulnerability > 0) {
+        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 60, yOffset);
+        yOffset += 20;
+    }
+    if (state.powerUpTimers.tripleShot > 0) {
+        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}s`, 60, yOffset);
+        yOffset += 20;
+    }
+    if (state.powerUpTimers.superMove > 0) {
+        ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}s`, 60, yOffset);
+    }
+
+
 }
 
 function gameLoop() {
