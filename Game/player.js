@@ -16,7 +16,9 @@ export function initPlayer(canvas) {
     player.y = canvas.height - player.height - 20;
 }
 
-export function movePlayer(keys, canvas) {
+export function movePlayer(keys, state) {
+    const { player, canvas, superMove } = state;
+
     if (keys['ArrowLeft'] || keys['a']) {
         player.x -= player.speed;
         if (player.x < 0) player.x = 0;
@@ -27,7 +29,22 @@ export function movePlayer(keys, canvas) {
             player.x = canvas.width - player.width;
         }
     }
+
+    if (superMove) {
+        if (keys['ArrowUp'] || keys['w']) {
+            player.y -= player.speed;
+            if (player.y < 0) player.y = 0;
+        }
+        if (keys['ArrowDown'] || keys['s']) {
+            player.y += player.speed;
+            if (player.y > canvas.height - player.height) {
+                player.y = canvas.height - player.height;
+            }
+        }
+    }
 }
+
+
 
 export function drawPlayer(ctx, player) {
     if (player.image instanceof HTMLImageElement && player.image.complete) {

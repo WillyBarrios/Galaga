@@ -73,3 +73,19 @@ export function drawEnemyProjectiles(ctx, state) {
         ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
     }
 }
+
+export function shootTriple(state) {
+    const player = state.player;
+
+    const offsets = [-10, 0, 10]; // 3 disparos con un poco de separación
+    for (let dx of offsets) {
+        playerProjectiles.push({
+            x: player.x + player.width / 2 - projectileWidth / 2 + dx,
+            y: player.y,
+            width: projectileWidth,
+            height: projectileHeight,
+            color: projectileColor,
+            speedY: projectileSpeed
+        });
+    }
+}

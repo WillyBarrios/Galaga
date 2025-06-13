@@ -1,5 +1,5 @@
 // ui.js
-import { maybeSpawnPowerUpForLevel } from './powerups.js';
+import { maybeSpawnPowerUpForLevel, powerUps } from './powerups.js';
 export const GAME_STATE = {
     MENU: 'menu',
     CREDITS: 'credits',
@@ -77,6 +77,9 @@ export function startGame(state) {
     state.playerProjectiles.length = 0;
     state.enemyProjectiles.length = 0;
     state.enemies.length = 0;
+    state.isInvulnerable = false;
+    state.tripleShot = false;
+    state.superMove = false;
     // Generar primer grupo de enemigos
     import('./enemy.js').then(({ spawnEnemyGroup }) => {
         spawnEnemyGroup(state.canvas.width, state.canvas.height, state);

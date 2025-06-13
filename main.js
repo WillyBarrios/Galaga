@@ -60,7 +60,11 @@ document.addEventListener('keydown', (e) => {
     } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
         startGame(state);
     } else if (state.currentGameState === GAME_STATE.PLAYING && e.key === ' ') {
+       if (state.tripleShot) {
+        shootTriple(state);
+    } else {
         shoot(state);
+    }
     }
 });
 
@@ -95,7 +99,12 @@ export const state = {
 };
 
 function update() {
-    movePlayer(keys, state.canvas);
+movePlayer(keys, {
+    player: state.player,
+    canvas: state.canvas,
+    superMove: state.superMove
+});
+
     updatePowerUps(state);
 
     if (state.isPaused) {
@@ -105,8 +114,6 @@ function update() {
         }
         return;
     }
-
-    movePlayer(state);
 
     updatePlayerProjectiles(state);
     updateEnemies(canvas.width, canvas.height, state); 

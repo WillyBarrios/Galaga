@@ -36,22 +36,23 @@ export function handleCollisions(state, { onPlayerHit, onEnemyDestroyed } = {}) 
     // Disparos enemigos contra jugador
     for (let i = 0; i < enemyProjectiles.length; i++) {
         const projectile = enemyProjectiles[i];
-        if (checkCollision(projectile, player)) {
+        if (!state.isInvulnerable && checkCollision(projectile, player)) {
             enemyProjectiles.splice(i, 1);
             i--;
             if (onPlayerHit) onPlayerHit();
             break;
         }
     }
-    // Enemigos colisionan con el jugador
-
-    for (let i = 0; i < enemies.length; i++) {
-        const enemy = enemies[i];
-        if (enemy.alive && checkCollision(enemy, player)) {
-            enemy.alive = false; // opcional: eliminar al enemigo al chocar
-            if (onPlayerHit) onPlayerHit();
-            break; // salimos después de una colisión
+for (let i = 0; i < enemies.length; i++) {
+    const enemy = enemies[i];
+    if (enemy.alive && checkCollision(enemy, player)) {
+        enemy.alive = false; // eliminar enemigo
+        if (!state.isInvulnerable && onPlayerHit) {
+            onPlayerHit();
         }
+        break; // salimos después de una colisión
     }
+}
+
 }
 

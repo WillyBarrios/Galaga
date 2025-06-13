@@ -1,4 +1,15 @@
 // powerups.js
+const powerUpImages = {
+    invulnerability: new Image(),
+    'triple-shot': new Image(),
+    'super-move': new Image(),
+    score: new Image()
+};
+
+powerUpImages.invulnerability.src = 'assets/powerups/estrella.png';
+powerUpImages['triple-shot'].src = 'assets/powerups/luna.png';
+powerUpImages['super-move'].src = 'assets/powerups/cohete.png';
+powerUpImages.score.src = 'assets/powerups/punto.png';
 
 export const POWERUP_TYPES = {
     INVULNERABILITY: 'invulnerability',
@@ -13,8 +24,8 @@ export function spawnPowerUp(x, y, type) {
     powerUps.push({
         x,
         y,
-        width: 24,
-        height: 24,
+        width: 32,
+        height: 32,
         type,
         active: true,
         speedY: 2
@@ -43,10 +54,17 @@ export function updatePowerUps(state) {
 
 export function drawPowerUps(ctx) {
     for (const p of powerUps) {
-        ctx.fillStyle = getColorForPowerUp(p.type);
-        ctx.fillRect(p.x, p.y, p.width, p.height);
+        const img = powerUpImages[p.type];
+        if (img.complete) {
+            ctx.drawImage(img, p.x, p.y, p.width, p.height);
+        } else {
+            // fallback (opcional)
+            ctx.fillStyle = 'gray';
+            ctx.fillRect(p.x, p.y, p.width, p.height);
+        }
     }
 }
+
 
 function getColorForPowerUp(type) {
     switch (type) {
@@ -58,6 +76,11 @@ function getColorForPowerUp(type) {
 }
 
 function applyPowerUpEffect(state, powerUp) {
+    console.log("✅ Power-up recogido:", powerUp.type);
+
+    // Animación de agrandamiento tipo Mario
+    animatePlayerScale(state.player);
+
     switch (powerUp.type) {
         case POWERUP_TYPES.INVULNERABILITY:
             state.isInvulnerable = true;
@@ -80,6 +103,7 @@ function applyPowerUpEffect(state, powerUp) {
             break;
     }
 }
+
 
 function checkCollision(a, b) {
     return (
@@ -105,4 +129,36 @@ function checkCollision(a, b) {
         spawnPowerUp(x, y, type);
     }
 }
+
+function animatePlayerScale(player) {
+    const originalWidth = player.width;
+    const originalHeight = player.height;
+
+    let growing = true;
+    let steps = 0;
+    const maxSteps = 10;
+    const scaleFactor = 1.5;
+
+    const interval = setInterval(() => {
+        if (growing) {
+            player.width = originalWidth * scaleFactor;
+            player.height = originalHeight * scaleFactor;
+            player.x -= (player.width - originalWidth) / 2;
+            player.y -= (player.height - originalHeight) / 2;
+        } else {
+            player.width = originalWidth;
+            player.height = originalHeight;
+            player.x += (originalWidth * scaleFactor - originalWidth) / 2;
+            player.y += (originalHeight * scaleFactor - originalHeight) / 2;
+        }
+
+        steps++;
+        if (steps >= maxSteps) {
+            clearInterval(interval);
+        }
+
+        growing = !growing;
+    }, 50); // Cambia cada 50ms para una animación rápida
+}
+
 
