@@ -58,6 +58,9 @@ export function drawGameOver(ctx, canvas) {
     ctx.font = '24px Arial';
     ctx.fillStyle = 'white';
     ctx.fillText('Presiona ESPACIO para reiniciar', canvas.width / 2, canvas.height / 2 + 30);
+    const savedData = JSON.parse(localStorage.getItem('galagaHighScore')) || { username: '-', score: 0 };
+    ctx.fillText(`Puntaje máximo: ${savedData.score} (${savedData.username})`, canvas.width / 2, canvas.height / 2 + 60);
+
 }
 
 export function startGame(state) {
@@ -84,6 +87,12 @@ export function startGame(state) {
     import('./enemy.js').then(({ spawnEnemyGroup }) => {
         spawnEnemyGroup(state.canvas.width, state.canvas.height, state);
     });
+    if (!state.username) {
+        state.username = prompt("Por favor, ingresa tu nombre de usuario:");
+        if (!state.username) {
+            state.username = "Jugador";
+        }
+    }
 }
 
 export function checkLevelProgress(state) {

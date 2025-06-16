@@ -131,7 +131,18 @@ function update() {
 
             if (state.playerLives <= 0) {
                 state.currentGameState = GAME_STATE.GAME_OVER;
-            } else {
+
+                const savedData = JSON.parse(localStorage.getItem('galagaHighScore')) || { score: 0 };
+
+                if (state.score > savedData.score) {
+                    localStorage.setItem('galagaHighScore', JSON.stringify({
+                        username: state.username,
+                        score: state.score
+                    }));
+                    console.log(`🎉 Nuevo puntaje máximo: ${state.score} por ${state.username}`);
+                }
+            }
+            else {
                 state.isPaused = true;
                 state.pauseTimer = 60; // pausa breve antes de seguir
             }
@@ -179,17 +190,22 @@ function draw() {
     ctx.fillText(`Nivel: ${state.level}`, 60, 60);
     let yOffset = 80;
     ctx.font = '16px Arial';
+    const highScore = localStorage.getItem('galagaHighScore') || 0;
+    ctx.fillText(`Puntaje máx: ${highScore}`, 100, 100);
+    const savedData = JSON.parse(localStorage.getItem('galagaHighScore')) || { username: '-', score: 0 };
+    ctx.fillText(`Puntaje máx: ${savedData.score} (${savedData.username})`, 60, 80);
+
 
     if (state.powerUpTimers.invulnerability > 0) {
-        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 60, yOffset); // Cambiar aqui la ubicacion de los carteles
+        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 80, yOffset); // Cambiar aqui la ubicacion de los carteles
         yOffset += 20;
     }
     if (state.powerUpTimers.tripleShot > 0) {
-        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}s`, 60, yOffset);
+        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}s`, 80, yOffset);
         yOffset += 20;
     }
     if (state.powerUpTimers.superMove > 0) {
-        ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}s`, 60, yOffset);
+        ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}s`, 80, yOffset);
     }
 
 
