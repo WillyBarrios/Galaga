@@ -213,15 +213,14 @@ function draw() {
     ctx.fillText(`Puntaje máx: ${savedData.score} (${savedData.username})`, 60, yOffset);
 
     if (state.powerUpTimers.invulnerability > 0) {
+        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 80, yOffset); // Cambiar aqui la ubicacion de los carteles
         yOffset += 20;
         ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 80, yOffset);
     }
     if (state.powerUpTimers.tripleShot > 0) {
-        yOffset += 20;
         ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}s`, 80, yOffset);
     }
     if (state.powerUpTimers.superMove > 0) {
-        yOffset += 20;
         ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}s`, 80, yOffset);
     }
 }
