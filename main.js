@@ -44,20 +44,31 @@ import {
     drawEnemyProjectiles
 } from './Game/projectile.js';
 
+// === SONIDOS ===
+const sonidoDisparo = new Audio('audio/sonido de laser.mp3');
+const sonidoExplosion = new Audio('audio/sonido de explosion.mp3');
+const sonidoFondo = new Audio('audio/musica de fondo.mp3');
+const sonidoGameOver = new Audio('audio/sonido de partida terminada.mp3');
+sonidoFondo.loop = true;
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 canvas.width = window.innerWidth * 0.9;
 canvas.height = window.innerHeight * 0.8;
+
 const keys = {};
+
 document.addEventListener('keydown', (e) => {
     keys[e.key] = true;
 
     if (state.currentGameState === GAME_STATE.MENU && e.key === ' ') {
+        sonidoFondo.play(); // Música de fondo al iniciar
         startGame(state);
     } else if (state.currentGameState === GAME_STATE.CREDITS && e.key === 'Escape') {
         state.currentGameState = GAME_STATE.MENU;
     } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
+        sonidoFondo.play(); // Reproducir música si reinicia el juego
         startGame(state);
     } else if (state.currentGameState === GAME_STATE.PLAYING && e.key === ' ') {
         if (state.tripleShot) {
@@ -65,6 +76,8 @@ document.addEventListener('keydown', (e) => {
         } else {
             shoot(state);
         }
+        sonidoDisparo.currentTime = 0;
+        sonidoDisparo.play(); // Sonido de disparo
     }
 });
 
@@ -91,7 +104,6 @@ export const state = {
     isPaused: false,
     pauseTimer: 0,
     enemyImage: enemyImage,
-    ctx: ctx,
     isInvulnerable: false,
     tripleShot: false,
     superMove: false,
@@ -121,19 +133,26 @@ function update() {
 
     updatePlayerProjectiles(state);
     updateEnemies(canvas.width, canvas.height, state);
-
     updateEnemyProjectiles(state);
 
     handleCollisions(state, {
         onPlayerHit: () => {
             state.playerLives--;
+            sonidoExplosion.currentTime = 0;
+            sonidoExplosion.play(); // Sonido al dañar jugador
+
             console.log("💥 Jugador alcanzado. Vidas restantes:", state.playerLives);
 
             if (state.playerLives <= 0) {
                 state.currentGameState = GAME_STATE.GAME_OVER;
 
-                const savedData = JSON.parse(localStorage.getItem('galagaHighScore')) || { score: 0 };
+                sonidoFondo.pause();
+                sonidoFondo.currentTime = 0;
 
+                sonidoGameOver.currentTime = 0;
+                sonidoGameOver.play(); // Sonido final
+
+                const savedData = JSON.parse(localStorage.getItem('galagaHighScore')) || { score: 0 };
                 if (state.score > savedData.score) {
                     localStorage.setItem('galagaHighScore', JSON.stringify({
                         username: state.username,
@@ -141,17 +160,17 @@ function update() {
                     }));
                     console.log(`🎉 Nuevo puntaje máximo: ${state.score} por ${state.username}`);
                 }
-            }
-            else {
+            } else {
                 state.isPaused = true;
-                state.pauseTimer = 60; // pausa breve antes de seguir
+                state.pauseTimer = 60;
             }
         },
         onEnemyDestroyed: () => {
             state.score += 100;
+            sonidoExplosion.currentTime = 0;
+            sonidoExplosion.play(); // Sonido al destruir enemigo
         }
     });
-
 
     state.enemySpawnTimer++;
     if (state.enemySpawnTimer >= state.enemySpawnInterval) {
@@ -170,7 +189,6 @@ function update() {
     }
 
     state.gameTime++;
-
     checkLevelProgress(state);
 }
 
@@ -188,27 +206,24 @@ function draw() {
     ctx.fillText(`Puntos: ${state.score}`, 60, 20);
     ctx.fillText(`Vidas: ${state.playerLives}`, 60, 40);
     ctx.fillText(`Nivel: ${state.level}`, 60, 60);
+
     let yOffset = 80;
     ctx.font = '16px Arial';
-    const highScore = localStorage.getItem('galagaHighScore') || 0;
-    ctx.fillText(`Puntaje máx: ${highScore}`, 100, 100);
     const savedData = JSON.parse(localStorage.getItem('galagaHighScore')) || { username: '-', score: 0 };
-    ctx.fillText(`Puntaje máx: ${savedData.score} (${savedData.username})`, 60, 80);
-
+    ctx.fillText(`Puntaje máx: ${savedData.score} (${savedData.username})`, 60, yOffset);
 
     if (state.powerUpTimers.invulnerability > 0) {
-        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 80, yOffset); // Cambiar aqui la ubicacion de los carteles
         yOffset += 20;
+        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 80, yOffset);
     }
     if (state.powerUpTimers.tripleShot > 0) {
-        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}s`, 80, yOffset);
         yOffset += 20;
+        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}s`, 80, yOffset);
     }
     if (state.powerUpTimers.superMove > 0) {
+        yOffset += 20;
         ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}s`, 80, yOffset);
     }
-
-
 }
 
 function gameLoop() {
@@ -222,29 +237,10 @@ function gameLoop() {
         update();
         draw();
     }
-    console.log("Estado actual:", state.currentGameState);
-
     requestAnimationFrame(gameLoop);
 }
 
-document.addEventListener('keydown', (e) => {
-    if (state.currentGameState === GAME_STATE.MENU) {
-        if (e.key === ' ') {
-            startGame(state);
-        } else if (e.key.toLowerCase() === 'c') {
-            state.currentGameState = GAME_STATE.CREDITS;
-        }
-    } else if (state.currentGameState === GAME_STATE.CREDITS && e.key === 'Escape') {
-        state.currentGameState = GAME_STATE.MENU;
-    } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
-        startGame(state);
-    } else if (state.currentGameState === GAME_STATE.PLAYING) {
-        if (e.key === ' ') {
-            shoot(state);
-        }
-    }
-});
-
+// Soporte para táctil
 canvas.addEventListener('touchstart', (event) => {
     const touch = event.touches[0];
     const rect = canvas.getBoundingClientRect();
@@ -258,6 +254,7 @@ canvas.addEventListener('touchstart', (event) => {
             touchY >= canvas.height * 0.6 &&
             touchY <= canvas.height * 0.6 + 50
         ) {
+            sonidoFondo.play(); // Música táctil
             startGame(state);
         }
     }
