@@ -1,9 +1,12 @@
-// main.js
+// === main.js actualizado: pausa detiene todo ===
+
 import {
     increaseLevel
 } from './Game/level.js';
+
 import {
-    updatePowerUps, drawPowerUps
+    updatePowerUps,
+    drawPowerUps
 } from './Game/powerups.js';
 
 import {
@@ -49,7 +52,43 @@ const sonidoDisparo = new Audio('audio/sonido de laser.mp3');
 const sonidoExplosion = new Audio('audio/sonido de explosion.mp3');
 const sonidoFondo = new Audio('audio/musica de fondo.mp3');
 const sonidoGameOver = new Audio('audio/sonido de partida terminada.mp3');
+const sonidoEspecial = new Audio('audio/sonido de estrella.mp3');
+
+const sonidoCohete = new Audio('audio/sonido_cohete.mp3');
+const sonidoLuna = new Audio('audio/sonido_luna.mp3');
+const sonidoPunto = new Audio('audio/sonido_punto.mp3');
+
 sonidoFondo.loop = true;
+sonidoEspecial.loop = false;
+
+let musicaTemporalActiva = null;
+
+function activarMusicaTemporal(audio, duracionEnSegundos = 30) {
+    if (musicaTemporalActiva) {
+        musicaTemporalActiva.pause();
+        musicaTemporalActiva.currentTime = 0;
+    }
+
+    sonidoFondo.pause();
+    sonidoFondo.currentTime = 0;
+
+    musicaTemporalActiva = audio;
+    audio.currentTime = 0;
+    audio.play();
+
+    setTimeout(() => {
+        if (musicaTemporalActiva === audio) {
+            audio.pause();
+            audio.currentTime = 0;
+            musicaTemporalActiva = null;
+            sonidoFondo.play();
+        }
+    }, duracionEnSegundos * 1000);
+}
+
+export function activarMusicaEspecial(duracion = 30) {
+    activarMusicaTemporal(sonidoEspecial, duracion);
+}
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -58,32 +97,6 @@ canvas.width = window.innerWidth * 0.9;
 canvas.height = window.innerHeight * 0.8;
 
 const keys = {};
-
-document.addEventListener('keydown', (e) => {
-    keys[e.key] = true;
-
-    if (state.currentGameState === GAME_STATE.MENU && e.key === ' ') {
-        sonidoFondo.play(); // Música de fondo al iniciar
-        startGame(state);
-    } else if (state.currentGameState === GAME_STATE.CREDITS && e.key === 'Escape') {
-        state.currentGameState = GAME_STATE.MENU;
-    } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
-        sonidoFondo.play(); // Reproducir música si reinicia el juego
-        startGame(state);
-    } else if (state.currentGameState === GAME_STATE.PLAYING && e.key === ' ') {
-        if (state.tripleShot) {
-            shootTriple(state);
-        } else {
-            shoot(state);
-        }
-        sonidoDisparo.currentTime = 0;
-        sonidoDisparo.play(); // Sonido de disparo
-    }
-});
-
-document.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
-});
 
 export const state = {
     currentGameState: GAME_STATE.MENU,
@@ -102,11 +115,11 @@ export const state = {
     enemyProjectiles: enemyProjectiles,
     enemies: [],
     isPaused: false,
-    pauseTimer: 0,
     enemyImage: enemyImage,
     isInvulnerable: false,
     tripleShot: false,
     superMove: false,
+    isImmortal: false,
     powerUpTimers: {
         invulnerability: 0,
         tripleShot: 0,
@@ -114,7 +127,63 @@ export const state = {
     }
 };
 
+function shootTriple(state) {
+    const { x, y, width } = state.player;
+    const centerX = x + width / 2;
+
+    state.playerProjectiles.push(
+        { x: centerX - 12, y, width: 4, height: 10, speedY: -5 },
+        { x: centerX, y, width: 4, height: 10, speedY: -5 },
+        { x: centerX + 12, y, width: 4, height: 10, speedY: -5 }
+    );
+}
+
+document.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+
+    if (e.key.toLowerCase() === 'p' && state.currentGameState === GAME_STATE.PLAYING) {
+        state.isPaused = !state.isPaused;
+        console.log(state.isPaused ? '⏸️ Juego en pausa' : '▶️ Juego reanudado');
+        if (state.isPaused) {
+            sonidoFondo.pause();
+            if (musicaTemporalActiva) musicaTemporalActiva.pause();
+        } else {
+            if (!musicaTemporalActiva) sonidoFondo.play();
+            else musicaTemporalActiva.play();
+        }
+    }
+
+    if (e.key === 'i') {
+        state.isImmortal = !state.isImmortal;
+        console.log(`🛡️ Modo inmortal: ${state.isImmortal ? 'ACTIVADO' : 'DESACTIVADO'}`);
+    }
+
+    if (state.currentGameState === GAME_STATE.MENU && e.key === ' ') {
+        sonidoFondo.play();
+        startGame(state);
+    } else if (state.currentGameState === GAME_STATE.CREDITS && e.key === 'Escape') {
+        state.currentGameState = GAME_STATE.MENU;
+    } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
+        sonidoFondo.play();
+        startGame(state);
+    } else if (state.currentGameState === GAME_STATE.PLAYING && e.key === ' ' && !state.isPaused) {
+        if (state.tripleShot) {
+            shootTriple(state);
+        } else {
+            shoot(state);
+        }
+        sonidoDisparo.currentTime = 0;
+        sonidoDisparo.play();
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    keys[e.key] = false;
+});
+
 function update() {
+    if (state.isPaused) return;
+
     movePlayer(keys, {
         player: state.player,
         canvas: state.canvas,
@@ -122,53 +191,37 @@ function update() {
     });
 
     updatePowerUps(state);
-
-    if (state.isPaused) {
-        state.pauseTimer--;
-        if (state.pauseTimer <= 0) {
-            state.isPaused = false;
-        }
-        return;
-    }
-
     updatePlayerProjectiles(state);
     updateEnemies(canvas.width, canvas.height, state);
     updateEnemyProjectiles(state);
 
     handleCollisions(state, {
         onPlayerHit: () => {
-            state.playerLives--;
-            sonidoExplosion.currentTime = 0;
-            sonidoExplosion.play(); // Sonido al dañar jugador
+            if (!state.isImmortal) {
+                state.playerLives--;
+                if (state.playerLives <= 0) {
+                    state.currentGameState = GAME_STATE.GAME_OVER;
+                    sonidoFondo.pause();
+                    sonidoGameOver.currentTime = 0;
+                    sonidoGameOver.play();
 
-            console.log("💥 Jugador alcanzado. Vidas restantes:", state.playerLives);
-
-            if (state.playerLives <= 0) {
-                state.currentGameState = GAME_STATE.GAME_OVER;
-
-                sonidoFondo.pause();
-                sonidoFondo.currentTime = 0;
-
-                sonidoGameOver.currentTime = 0;
-                sonidoGameOver.play(); // Sonido final
-
-                const savedData = JSON.parse(localStorage.getItem('galagaHighScore')) || { score: 0 };
-                if (state.score > savedData.score) {
-                    localStorage.setItem('galagaHighScore', JSON.stringify({
-                        username: state.username,
-                        score: state.score
-                    }));
-                    console.log(`🎉 Nuevo puntaje máximo: ${state.score} por ${state.username}`);
+                    const saved = JSON.parse(localStorage.getItem('galagaHighScore')) || { score: 0 };
+                    if (state.score > saved.score) {
+                        localStorage.setItem('galagaHighScore', JSON.stringify({
+                            username: state.username,
+                            score: state.score
+                        }));
+                        console.log(`🎉 Nuevo puntaje máximo: ${state.score}`);
+                    }
                 }
-            } else {
-                state.isPaused = true;
-                state.pauseTimer = 60;
             }
+            sonidoExplosion.currentTime = 0;
+            sonidoExplosion.play();
         },
         onEnemyDestroyed: () => {
             state.score += 100;
             sonidoExplosion.currentTime = 0;
-            sonidoExplosion.play(); // Sonido al destruir enemigo
+            sonidoExplosion.play();
         }
     });
 
@@ -180,10 +233,10 @@ function update() {
 
     state.enemyShootTimer++;
     if (state.enemyShootTimer >= state.baseEnemyShootInterval) {
-        const aliveEnemies = state.enemies.filter(e => e.alive);
-        if (aliveEnemies.length > 0) {
-            const randomEnemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
-            enemyShoot(randomEnemy, state);
+        const vivos = state.enemies.filter(e => e.alive);
+        if (vivos.length > 0) {
+            const enemigo = vivos[Math.floor(Math.random() * vivos.length)];
+            enemyShoot(enemigo, state);
         }
         state.enemyShootTimer = 0;
     }
@@ -195,11 +248,11 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawPlayer(state.ctx, state.player);
+    drawPlayer(ctx, state.player);
     drawPlayerProjectiles(state);
-    drawEnemyProjectiles(state.ctx, state);
-    drawEnemies(state.ctx, state);
-    drawPowerUps(state.ctx, state);
+    drawEnemyProjectiles(ctx, state);
+    drawEnemies(ctx, state);
+    drawPowerUps(ctx, state);
 
     ctx.fillStyle = 'white';
     ctx.font = '18px Arial';
@@ -207,21 +260,37 @@ function draw() {
     ctx.fillText(`Vidas: ${state.playerLives}`, 60, 40);
     ctx.fillText(`Nivel: ${state.level}`, 60, 60);
 
-    let yOffset = 80;
-    ctx.font = '16px Arial';
-    const savedData = JSON.parse(localStorage.getItem('galagaHighScore')) || { username: '-', score: 0 };
-    ctx.fillText(`Puntaje máx: ${savedData.score} (${savedData.username})`, 60, yOffset);
+    let y = 80;
+    const high = JSON.parse(localStorage.getItem('galagaHighScore')) || { username: '-', score: 0 };
+    ctx.fillText(`Puntaje máx: ${high.score} (${high.username})`, 60, y);
 
     if (state.powerUpTimers.invulnerability > 0) {
-        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 80, yOffset); // Cambiar aqui la ubicacion de los carteles
-        yOffset += 20;
-        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}s`, 80, yOffset);
+        y += 20;
+        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}`, 80, y);
     }
     if (state.powerUpTimers.tripleShot > 0) {
-        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}s`, 80, yOffset);
+        y += 20;
+        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}`, 80, y);
     }
     if (state.powerUpTimers.superMove > 0) {
-        ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}s`, 80, yOffset);
+        y += 20;
+        ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}`, 80, y);
+    }
+
+    if (state.isImmortal) {
+        ctx.fillStyle = 'yellow';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillText("🛡️ MODO INMORTAL ACTIVADO", canvas.width - 270, 30);
+    }
+
+    if (state.isPaused) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('⏸️ JUEGO EN PAUSA', canvas.width / 2, canvas.height / 2);
+        ctx.textAlign = 'start';
     }
 }
 
@@ -236,27 +305,29 @@ function gameLoop() {
         update();
         draw();
     }
+
     requestAnimationFrame(gameLoop);
 }
 
-// Soporte para táctil
 canvas.addEventListener('touchstart', (event) => {
-    const touch = event.touches[0];
+    const t = event.touches[0];
     const rect = canvas.getBoundingClientRect();
-    const touchX = touch.clientX - rect.left;
-    const touchY = touch.clientY - rect.top;
+    const x = t.clientX - rect.left;
+    const y = t.clientY - rect.top;
 
     if (state.currentGameState === GAME_STATE.MENU) {
-        if (
-            touchX >= canvas.width / 4 &&
-            touchX <= canvas.width * 3 / 4 &&
-            touchY >= canvas.height * 0.6 &&
-            touchY <= canvas.height * 0.6 + 50
-        ) {
-            sonidoFondo.play(); // Música táctil
+        if (x >= canvas.width / 4 && x <= canvas.width * 3 / 4 && y >= canvas.height * 0.6 && y <= canvas.height * 0.6 + 50) {
+            sonidoFondo.play();
             startGame(state);
         }
     }
 });
 
 gameLoop();
+
+export {
+    sonidoCohete,
+    sonidoLuna,
+    sonidoPunto,
+    activarMusicaTemporal
+};
