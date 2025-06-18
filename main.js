@@ -120,6 +120,9 @@ export const state = {
     tripleShot: false,
     superMove: false,
     isImmortal: false,
+    lifeLostActive: false,
+    lifeLostTimer: 0,
+    lifeLostTimerMax: 0,
     powerUpTimers: {
         invulnerability: 0,
         tripleShot: 0,
@@ -182,8 +185,17 @@ document.addEventListener('keyup', (e) => {
 });
 
 function update() {
-    if (state.isPaused) return;
+    if (state.lifeLostActive) {
+        state.lifeLostTimer--;
+        if (state.lifeLostTimer <= 0) {
+            state.lifeLostActive = false;
+        }
+        return; // Detener updates mientras mostramos el mensaje
+    }
 
+    if (state.isPaused) {
+        return;
+    }
     movePlayer(keys, {
         player: state.player,
         canvas: state.canvas,
@@ -213,6 +225,10 @@ function update() {
                         }));
                         console.log(`🎉 Nuevo puntaje máximo: ${state.score}`);
                     }
+                } else {
+                    state.lifeLostActive = true;
+                    state.lifeLostTimer = 60;
+                    state.lifeLostTimerMax = 60
                 }
             }
             sonidoExplosion.currentTime = 0;
@@ -248,12 +264,14 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Dibujar entidades
     drawPlayer(ctx, state.player);
     drawPlayerProjectiles(state);
     drawEnemyProjectiles(ctx, state);
     drawEnemies(ctx, state);
     drawPowerUps(ctx, state);
 
+    // HUD
     ctx.fillStyle = 'white';
     ctx.font = '18px Arial';
     ctx.fillText(`Puntos: ${state.score}`, 60, 20);
@@ -283,7 +301,18 @@ function draw() {
         ctx.fillText("🛡️ MODO INMORTAL ACTIVADO", canvas.width - 270, 30);
     }
 
-    if (state.isPaused) {
+    // Cartel de vida perdida
+    if (state.lifeLostActive) {
+        const alpha = 1 - (state.lifeLostTimer / state.lifeLostTimerMax);
+        ctx.fillStyle = `rgba(255, 255, 0, ${alpha})`;
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('¡Vida perdida!', canvas.width / 2, canvas.height / 2);
+        ctx.textAlign = 'start';
+    }
+
+    // Cartel de pausa (solo si no estamos en estado de vida perdida)
+    if (state.isPaused && !state.lifeLostActive) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
@@ -293,6 +322,7 @@ function draw() {
         ctx.textAlign = 'start';
     }
 }
+
 
 function gameLoop() {
     if (state.currentGameState === GAME_STATE.MENU) {
