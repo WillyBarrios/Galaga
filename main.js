@@ -161,6 +161,11 @@ document.addEventListener('keydown', (e) => {
         console.log(`🛡️ Modo inmortal: ${state.isImmortal ? 'ACTIVADO' : 'DESACTIVADO'}`);
     }
 
+    if (state.currentGameState === GAME_STATE.COMMANDS && e.key.toLowerCase() === 'k') {
+    state.currentGameState = GAME_STATE.MENU;
+}
+
+
     if (state.currentGameState === GAME_STATE.MENU && e.key === ' ') {
         sonidoFondo.play();
         startGame(state);
@@ -390,19 +395,37 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-canvas.addEventListener('touchstart', (event) => {
-    const t = event.touches[0];
+canvas.addEventListener('mousedown', (event) => {
     const rect = canvas.getBoundingClientRect();
-    const x = t.clientX - rect.left;
-    const y = t.clientY - rect.top;
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
     if (state.currentGameState === GAME_STATE.MENU) {
-        if (x >= canvas.width / 4 && x <= canvas.width * 3 / 4 && y >= canvas.height * 0.6 && y <= canvas.height * 0.6 + 50) {
+        const btnJugar = {
+            x: canvas.width / 4,
+            y: canvas.height * 0.6,
+            width: canvas.width / 2,
+            height: 50
+        };
+
+        const btnComandos = {
+            x: canvas.width / 4,
+            y: canvas.height * 0.7,
+            width: canvas.width / 2,
+            height: 50
+        };
+
+        if (x >= btnJugar.x && x <= btnJugar.x + btnJugar.width && y >= btnJugar.y && y <= btnJugar.y + btnJugar.height) {
             sonidoFondo.play();
             startGame(state);
         }
+
+        if (x >= btnComandos.x && x <= btnComandos.x + btnComandos.width && y >= btnComandos.y && y <= btnComandos.y + btnComandos.height) {
+            state.currentGameState = GAME_STATE.COMMANDS;
+        }
     }
 });
+
 function salirAlMenu() {
     sonidoFondo.pause();
     sonidoFondo.currentTime = 0;
@@ -426,6 +449,10 @@ function salirAlMenu() {
     state.showExitConfirm = false;
 }
 gameLoop();
+
+if (state.currentGameState === GAME_STATE.COMMANDS) {
+    drawCommands(ctx, canvas);
+}
 
 export {
     sonidoCohete,
