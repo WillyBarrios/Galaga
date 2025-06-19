@@ -75,13 +75,20 @@ export function updatePowerUps(state) {
         }
     }
 
-    if (state.powerUpTimers.superMove > 0) {
-        state.powerUpTimers.superMove--;
-        if (state.powerUpTimers.superMove === 0) {
-            state.superMove = false;
-            state.isInvulnerable = false;
-        }
+if (state.powerUpTimers.superMove > 0) {
+    state.powerUpTimers.superMove--;
+    if (state.powerUpTimers.superMove === 0) {
+        state.superMove = false;
+
+        // Activar invulnerabilidad temporal al terminar superMove
+        state.isInvulnerable = true;
+        state.powerUpTimers.invulnerability = 120; // 2 segundos aprox (ajusta a gusto)
+
+        // Iniciar movimiento hacia abajo
+        state.returningToBottom = true;
     }
+}
+
 }
 
 // === DIBUJAR POWERUPS ===

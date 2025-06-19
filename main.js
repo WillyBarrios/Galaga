@@ -73,10 +73,15 @@ function activarMusicaTemporal(audio, duracionEnSegundos = 30) {
     sonidoFondo.currentTime = 0;
 
     musicaTemporalActiva = audio;
-    audio.currentTime = 0;
-    audio.play();
+    musicaTemporalActiva.currentTime = 0;
+    musicaTemporalActiva.play();
 
-    setTimeout(() => {
+    // Clear any existing timer
+    if (activarMusicaTemporal.timer) {
+        clearTimeout(activarMusicaTemporal.timer);
+    }
+
+    activarMusicaTemporal.timer = setTimeout(() => {
         if (musicaTemporalActiva === audio) {
             audio.pause();
             audio.currentTime = 0;
@@ -85,6 +90,7 @@ function activarMusicaTemporal(audio, duracionEnSegundos = 30) {
         }
     }, duracionEnSegundos * 1000);
 }
+
 
 export function activarMusicaEspecial(duracion = 30) {
     activarMusicaTemporal(sonidoEspecial, duracion);
@@ -121,6 +127,7 @@ export const state = {
     superMove: false,
     isImmortal: false,
     lifeLostActive: false,
+    returningToBottom: false,
     lifeLostTimer: 0,
     lifeLostTimerMax: 0,
     powerUpTimers: {
@@ -279,6 +286,15 @@ function update() {
 
     state.gameTime++;
     checkLevelProgress(state);
+    if (state.returningToBottom) {
+    state.player.y += 5; // velocidad de descenso
+    if (state.player.y >= state.canvas.height - state.player.height - 20) {
+        state.player.y = state.canvas.height - state.player.height - 20;
+        state.returningToBottom = false;
+        // La invulnerabilidad terminará por el propio temporizador que ya tienes
+    }
+}
+
 }
 
 function draw() {
