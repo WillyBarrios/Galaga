@@ -120,6 +120,9 @@ export const state = {
     tripleShot: false,
     superMove: false,
     isImmortal: false,
+    lifeLostActive: false,
+    lifeLostTimer: 0,
+    lifeLostTimerMax: 0,
     powerUpTimers: {
         invulnerability: 0,
         tripleShot: 0,
@@ -161,6 +164,8 @@ document.addEventListener('keydown', (e) => {
     if (state.currentGameState === GAME_STATE.MENU && e.key === ' ') {
         sonidoFondo.play();
         startGame(state);
+    } else if (state.currentGameState === GAME_STATE.MENU && e.key.toLowerCase() === 'c') {
+        state.currentGameState = GAME_STATE.CREDITS;
     } else if (state.currentGameState === GAME_STATE.CREDITS && e.key === 'Escape') {
         state.currentGameState = GAME_STATE.MENU;
     } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
@@ -175,6 +180,19 @@ document.addEventListener('keydown', (e) => {
         sonidoDisparo.currentTime = 0;
         sonidoDisparo.play();
     }
+    else if (state.currentGameState === GAME_STATE.PLAYING && e.key === 'Escape') {
+        state.showExitConfirm = true;
+        state.isPaused = true;
+    }
+    else if (state.showExitConfirm && e.key.toLowerCase() === 'y') {
+        salirAlMenu();
+    }
+    else if (state.showExitConfirm && e.key.toLowerCase() === 'n') {
+        state.showExitConfirm = false;
+        state.isPaused = false;
+    }
+
+
 });
 
 document.addEventListener('keyup', (e) => {
@@ -182,8 +200,17 @@ document.addEventListener('keyup', (e) => {
 });
 
 function update() {
-    if (state.isPaused) return;
+    if (state.lifeLostActive) {
+        state.lifeLostTimer--;
+        if (state.lifeLostTimer <= 0) {
+            state.lifeLostActive = false;
+        }
+        return; // Detener updates mientras mostramos el mensaje
+    }
 
+    if (state.isPaused) {
+        return;
+    }
     movePlayer(keys, {
         player: state.player,
         canvas: state.canvas,
@@ -213,6 +240,10 @@ function update() {
                         }));
                         console.log(`🎉 Nuevo puntaje máximo: ${state.score}`);
                     }
+                } else {
+                    state.lifeLostActive = true;
+                    state.lifeLostTimer = 60;
+                    state.lifeLostTimerMax = 60
                 }
             }
             sonidoExplosion.currentTime = 0;
@@ -248,51 +279,93 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // === Dibujar entidades del juego ===
     drawPlayer(ctx, state.player);
     drawPlayerProjectiles(state);
     drawEnemyProjectiles(ctx, state);
     drawEnemies(ctx, state);
     drawPowerUps(ctx, state);
 
+    // === HUD: Fijo a la izquierda ===
     ctx.fillStyle = 'white';
     ctx.font = '18px Arial';
-    ctx.fillText(`Puntos: ${state.score}`, 60, 20);
-    ctx.fillText(`Vidas: ${state.playerLives}`, 60, 40);
-    ctx.fillText(`Nivel: ${state.level}`, 60, 60);
+    ctx.textAlign = 'start'; // Alineación izquierda
 
-    let y = 80;
+    const x = 20;
+    let y = 20;
+
+    ctx.fillText(`Puntos: ${state.score}`, x, y);
+    y += 20;
+    ctx.fillText(`Vidas: ${state.playerLives}`, x, y);
+    y += 20;
+    ctx.fillText(`Nivel: ${state.level}`, x, y);
+    y += 20;
+
     const high = JSON.parse(localStorage.getItem('galagaHighScore')) || { username: '-', score: 0 };
-    ctx.fillText(`Puntaje máx: ${high.score} (${high.username})`, 60, y);
+    ctx.fillText(`Puntaje máx: ${high.score} (${high.username})`, x, y);
+    y += 20;
 
     if (state.powerUpTimers.invulnerability > 0) {
+        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}`, x + 20, y);
         y += 20;
-        ctx.fillText(`Invulnerabilidad: ${state.powerUpTimers.invulnerability}`, 80, y);
     }
     if (state.powerUpTimers.tripleShot > 0) {
+        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}`, x + 20, y);
         y += 20;
-        ctx.fillText(`Disparo triple: ${state.powerUpTimers.tripleShot}`, 80, y);
     }
     if (state.powerUpTimers.superMove > 0) {
+        ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}`, x + 20, y);
         y += 20;
-        ctx.fillText(`Súper movimiento: ${state.powerUpTimers.superMove}`, 80, y);
     }
 
+    // === Cartel de inmortalidad (también a la izquierda)
     if (state.isImmortal) {
         ctx.fillStyle = 'yellow';
         ctx.font = 'bold 16px Arial';
         ctx.fillText("🛡️ MODO INMORTAL ACTIVADO", canvas.width - 270, 30);
     }
 
-    if (state.isPaused) {
+    // === Cartel de vida perdida ===
+    if (state.lifeLostActive) {
+        ctx.save();
+        const alpha = 1 - (state.lifeLostTimer / state.lifeLostTimerMax);
+        ctx.fillStyle = `rgba(255, 255, 0, ${alpha})`;
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('¡Vida perdida!', canvas.width / 2, canvas.height / 2);
+        ctx.restore();
+    }
+
+    // === Cartel de confirmación de salida ===
+    if (state.showExitConfirm) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚠️ Salir al menú principal', canvas.width / 2, canvas.height / 2 - 40);
+        ctx.font = '20px Arial';
+        ctx.fillText('Se perderá el progreso actual.', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('Presiona Y para confirmar o N para cancelar.', canvas.width / 2, canvas.height / 2 + 40);
+        ctx.restore();
+    }
+
+    // === Cartel de pausa normal ===
+    else if (state.isPaused) {
+        ctx.save();
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
         ctx.font = 'bold 32px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('⏸️ JUEGO EN PAUSA', canvas.width / 2, canvas.height / 2);
-        ctx.textAlign = 'start';
+        ctx.restore();
     }
 }
+
+
 
 function gameLoop() {
     if (state.currentGameState === GAME_STATE.MENU) {
@@ -322,7 +395,28 @@ canvas.addEventListener('touchstart', (event) => {
         }
     }
 });
+function salirAlMenu() {
+    sonidoFondo.pause();
+    sonidoFondo.currentTime = 0;
 
+    if (musicaTemporalActiva) {
+        musicaTemporalActiva.pause();
+        musicaTemporalActiva.currentTime = 0;
+    }
+
+    state.currentGameState = GAME_STATE.MENU;
+    state.playerLives = 3;
+    state.score = 0;
+    state.level = 1;
+    state.isPaused = false;
+    state.tripleShot = false;
+    state.superMove = false;
+    state.isInvulnerable = false;
+    state.enemyProjectiles.length = 0;
+    state.playerProjectiles.length = 0;
+    state.enemies.length = 0;
+    state.showExitConfirm = false;
+}
 gameLoop();
 
 export {
