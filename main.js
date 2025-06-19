@@ -164,6 +164,8 @@ document.addEventListener('keydown', (e) => {
     if (state.currentGameState === GAME_STATE.MENU && e.key === ' ') {
         sonidoFondo.play();
         startGame(state);
+    } else if (state.currentGameState === GAME_STATE.MENU && e.key.toLowerCase() === 'c') {
+        state.currentGameState = GAME_STATE.CREDITS;
     } else if (state.currentGameState === GAME_STATE.CREDITS && e.key === 'Escape') {
         state.currentGameState = GAME_STATE.MENU;
     } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
@@ -178,6 +180,19 @@ document.addEventListener('keydown', (e) => {
         sonidoDisparo.currentTime = 0;
         sonidoDisparo.play();
     }
+    else if (state.currentGameState === GAME_STATE.PLAYING && e.key === 'Escape') {
+        state.showExitConfirm = true;
+        state.isPaused = true;
+    }
+    else if (state.showExitConfirm && e.key.toLowerCase() === 'y') {
+        salirAlMenu();
+    }
+    else if (state.showExitConfirm && e.key.toLowerCase() === 'n') {
+        state.showExitConfirm = false;
+        state.isPaused = false;
+    }
+
+
 });
 
 document.addEventListener('keyup', (e) => {
@@ -312,7 +327,22 @@ function draw() {
     }
 
     // Cartel de pausa (solo si no estamos en estado de vida perdida)
-    if (state.isPaused && !state.lifeLostActive) {
+    if (state.showExitConfirm) {
+        // Si el modal de salida está activo, solo dibuja este
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚠️ Salir al menú principal', canvas.width / 2, canvas.height / 2 - 40);
+        ctx.font = '20px Arial';
+        ctx.fillText('Se perderá el progreso actual.', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('Presiona Y para confirmar o N para cancelar.', canvas.width / 2, canvas.height / 2 + 40);
+        ctx.textAlign = 'start';
+    }
+    else if (state.isPaused) {
+        // Pausa normal, solo si no hay modal de salida
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
@@ -352,7 +382,28 @@ canvas.addEventListener('touchstart', (event) => {
         }
     }
 });
+function salirAlMenu() {
+    sonidoFondo.pause();
+    sonidoFondo.currentTime = 0;
 
+    if (musicaTemporalActiva) {
+        musicaTemporalActiva.pause();
+        musicaTemporalActiva.currentTime = 0;
+    }
+
+    state.currentGameState = GAME_STATE.MENU;
+    state.playerLives = 3;
+    state.score = 0;
+    state.level = 1;
+    state.isPaused = false;
+    state.tripleShot = false;
+    state.superMove = false;
+    state.isInvulnerable = false;
+    state.enemyProjectiles.length = 0;
+    state.playerProjectiles.length = 0;
+    state.enemies.length = 0;
+    state.showExitConfirm = false;
+}
 gameLoop();
 
 export {
