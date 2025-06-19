@@ -1,4 +1,4 @@
-// === main.js actualizado: pausa detiene todo ===
+// === main.js actualizado: hello ===
 
 import {
     increaseLevel
