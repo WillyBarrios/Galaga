@@ -279,14 +279,12 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // === Dibujar entidades del juego ===
     drawPlayer(ctx, state.player);
     drawPlayerProjectiles(state);
     drawEnemyProjectiles(ctx, state);
     drawEnemies(ctx, state);
     drawPowerUps(ctx, state);
 
-    // === HUD: Fijo a la izquierda ===
     ctx.fillStyle = 'white';
     ctx.font = '18px Arial';
     ctx.textAlign = 'start'; // Alineación izquierda
@@ -331,36 +329,7 @@ for (let i = 0; i < state.playerLives; i++) {
         ctx.fillText("🛡️ MODO INMORTAL ACTIVADO", canvas.width - 270, 30);
     }
 
-    // === Cartel de vida perdida ===
-    if (state.lifeLostActive) {
-        ctx.save();
-        const alpha = 1 - (state.lifeLostTimer / state.lifeLostTimerMax);
-        ctx.fillStyle = `rgba(255, 255, 0, ${alpha})`;
-        ctx.font = 'bold 48px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('¡Vida perdida!', canvas.width / 2, canvas.height / 2);
-        ctx.restore();
-    }
-
-    // === Cartel de confirmación de salida ===
-    if (state.showExitConfirm) {
-        ctx.save();
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = 'white';
-        ctx.font = '32px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('⚠️ Salir al menú principal', canvas.width / 2, canvas.height / 2 - 40);
-        ctx.font = '20px Arial';
-        ctx.fillText('Se perderá el progreso actual.', canvas.width / 2, canvas.height / 2);
-        ctx.fillText('Presiona Y para confirmar o N para cancelar.', canvas.width / 2, canvas.height / 2 + 40);
-        ctx.restore();
-    }
-
-    // === Cartel de pausa normal ===
-    else if (state.isPaused) {
-        ctx.save();
+    if (state.isPaused) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
@@ -372,8 +341,6 @@ for (let i = 0; i < state.playerLives; i++) {
 
     
 }
-
-
 
 function gameLoop() {
     if (state.currentGameState === GAME_STATE.MENU) {
