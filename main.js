@@ -296,7 +296,13 @@ function draw() {
 
     ctx.fillText(`Puntos: ${state.score}`, x, y);
     y += 20;
-    ctx.fillText(`Vidas: ${state.playerLives}`, x, y);
+   ctx.fillText("Vidas:", x, y);
+
+let heartX = x + 60; // posición inicial para los corazones (separado del texto "Vidas:")
+for (let i = 0; i < state.playerLives; i++) {
+    ctx.fillText("❤️", heartX + i * 22, y); // dibuja un corazón por vida
+}
+;
     y += 20;
     ctx.fillText(`Nivel: ${state.level}`, x, y);
     y += 20;
@@ -363,6 +369,8 @@ function draw() {
         ctx.fillText('⏸️ JUEGO EN PAUSA', canvas.width / 2, canvas.height / 2);
         ctx.restore();
     }
+
+    
 }
 
 
