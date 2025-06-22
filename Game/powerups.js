@@ -1,10 +1,11 @@
+//powerups.js
 import {
     activarMusicaEspecial,
     activarMusicaTemporal,
     sonidoCohete,
     sonidoLuna,
     sonidoPunto
-} from '../main.js'; // Asegúrate de que la ruta sea correcta
+} from '../main.js'; 
 
 // === IMÁGENES DE POWERUPS ===
 const powerUpImages = {
