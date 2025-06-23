@@ -19,7 +19,8 @@ import {
 } from './Game/ui.js';
 
 import {
-    handleCollisions
+    handleCollisions,
+    checkCollision
 } from './Game/collisions.js';
 
 import {
@@ -50,6 +51,7 @@ import {
     spawnBoss,
     updateBoss,
     drawBoss,
+    drawBossProjectiles
 } from './Game/boss.js';
 
 const sonidoBossIntro = new Audio('audio/boss.mp3');
@@ -148,6 +150,7 @@ export const state = {
     },
     bossIntroActive: false,
     bossIntroTimer: 0,
+
 
 };
 
@@ -322,6 +325,21 @@ function update() {
     });
     if (state.bossActive) {
         updateBoss(state.canvas.width, state);
+        if (state.bossProjectiles) {
+            for (let i = state.bossProjectiles.length - 1; i >= 0; i--) {
+                const p = state.bossProjectiles[i];
+                p.y += p.speedY;
+                if (p.y > state.canvas.height) {
+                    state.bossProjectiles.splice(i, 1);
+                    continue;
+                }
+                if (!state.isInvulnerable && checkCollision(p, state.player)) {
+                    state.bossProjectiles.splice(i, 1);
+                    if (onPlayerHit) onPlayerHit();
+                }
+            }
+        }
+
     } else {
         state.enemySpawnTimer++;
         if (state.enemySpawnTimer >= state.enemySpawnInterval) {
@@ -329,8 +347,6 @@ function update() {
             state.enemySpawnTimer = 0;
         }
     }
-
-
 
     if (!state.bossActive) {
         state.enemyShootTimer++;
@@ -355,17 +371,11 @@ function update() {
             // La invulnerabilidad terminará por el propio temporizador que ya tienes
         }
     }
-    /* if ([5, 10, 15].includes(state.level) && !boss.active && !state.bossIntroActive) {
-         spawnBoss(state);
-         state.bossActive = true;
-         state.enemies = [];
-         state.bossIntroActive = true;
-         state.bossIntroTimer = 180; // 3 segundos si usas 60 FPS
-         sonidoFondo.pause();
-         sonidoBossIntro.play();
-     
-     }*/
-
+    if (state.level >= 15) {
+        state.invertedControls = true;
+    } else {
+        state.invertedControls = false;
+    }
 
 }
 
@@ -381,6 +391,7 @@ function draw() {
         updateBoss(state);
     }
     drawBoss(ctx, state);
+    drawBossProjectiles(ctx, state);
     drawPowerUps(ctx, state);
 
     // === HUD: Fijo a la izquierda ===
@@ -483,6 +494,18 @@ function draw() {
         ctx.textAlign = 'center';
         ctx.fillText('¡Se acerca una nave nodriza!', canvas.width / 2, canvas.height / 2);
     }
+
+    if (state.bossProjectiles) {
+        for (let i = 0; i < state.bossProjectiles.length; i++) {
+            const p = state.bossProjectiles[i];
+            p.y += p.speedY;
+            if (p.y > state.canvas.height) {
+                state.bossProjectiles.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
 }
 
 

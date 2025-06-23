@@ -26,6 +26,12 @@ export function updateBoss(state) {
     if (boss.x < 0 || boss.x + boss.width > state.canvas.width) {
         boss.speedX *= -1;
     }
+    if (!boss.shootTimer) boss.shootTimer = 0;
+    boss.shootTimer++;
+    if (boss.shootTimer >= 90) { // dispara cada 1.5s aprox (60 FPS)
+        bossShoot(state);
+        boss.shootTimer = 0;
+    }
 }
 
 export function drawBoss(ctx, state) {
@@ -55,3 +61,32 @@ export function drawBoss(ctx, state) {
     ctx.strokeStyle = 'white';
     ctx.strokeRect(barX, barY, barWidth, barHeight);
 }
+export function bossShoot(state) {
+    const boss = state.boss;
+    if (!boss) return;
+
+    const projectile = {
+        x: boss.x + boss.width / 2 - 10, // centra la bola
+        y: boss.y + boss.height,
+        width: 20,
+        height: 20,
+        speedY: 4,
+        color: 'orange'
+    };
+
+    if (!state.bossProjectiles) {
+        state.bossProjectiles = [];
+    }
+    state.bossProjectiles.push(projectile);
+}
+export function drawBossProjectiles(ctx, state) {
+    if (!state.bossProjectiles) return;
+    ctx.fillStyle = 'orange';
+    for (const proj of state.bossProjectiles) {
+        ctx.beginPath();
+        ctx.arc(proj.x + proj.width / 2, proj.y + proj.height / 2, proj.width / 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+

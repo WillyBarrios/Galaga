@@ -42,6 +42,49 @@ export function movePlayer(keys, state) {
             }
         }
     }
+
+    const invert = state.level === 15;
+
+    if ((keys['ArrowLeft'] || keys['a'])) {
+        if (invert) {
+            player.x += player.speed;
+            if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+        } else {
+            player.x -= player.speed;
+            if (player.x < 0) player.x = 0;
+        }
+    }
+    if ((keys['ArrowRight'] || keys['d'])) {
+        if (invert) {
+            player.x -= player.speed;
+            if (player.x < 0) player.x = 0;
+        } else {
+            player.x += player.speed;
+            if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+        }
+    }
+
+    if (state.superMove) {
+        if ((keys['ArrowUp'] || keys['w'])) {
+            if (invert) {
+                player.y += player.speed;
+                if (player.y > canvas.height - player.height) player.y = canvas.height - player.height;
+            } else {
+                player.y -= player.speed;
+                if (player.y < 0) player.y = 0;
+            }
+        }
+        if ((keys['ArrowDown'] || keys['s'])) {
+            if (invert) {
+                player.y -= player.speed;
+                if (player.y < 0) player.y = 0;
+            } else {
+                player.y += player.speed;
+                if (player.y > canvas.height - player.height) player.y = canvas.height - player.height;
+            }
+        }
+    }
+
 }
 
 
