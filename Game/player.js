@@ -7,7 +7,7 @@ export const player = {
     y: 0,
     width: 32,
     height: 32,
-    speed: 5,
+    speed: 4,
     image: playerImage
 };
 

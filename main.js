@@ -335,8 +335,37 @@ function update() {
                 }
                 if (!state.isInvulnerable && checkCollision(p, state.player)) {
                     state.bossProjectiles.splice(i, 1);
-                    if (onPlayerHit) onPlayerHit();
+                    i--;
+
+                    if (!state.isImmortal) {
+                        state.playerLives--;
+                        if (state.playerLives <= 0) {
+                            state.currentGameState = GAME_STATE.GAME_OVER;
+                            sonidoFondo.pause();
+                            sonidoGameOver.currentTime = 0;
+                            sonidoGameOver.play();
+
+                            const saved = JSON.parse(localStorage.getItem('galagaHighScore')) || { score: 0 };
+                            if (state.score > saved.score) {
+                                localStorage.setItem('galagaHighScore', JSON.stringify({
+                                    username: state.username,
+                                    score: state.score
+                                }));
+                                console.log(`🎉 Nuevo puntaje máximo: ${state.score}`);
+                            }
+                        } else {
+                            state.lifeLostActive = true;
+                            state.lifeLostTimer = 60;
+                            state.lifeLostTimerMax = 60;
+                        }
+                    }
+
+                    sonidoExplosion.currentTime = 0;
+                    sonidoExplosion.play();
+
+                    break;
                 }
+
             }
         }
 
