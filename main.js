@@ -232,12 +232,15 @@ document.addEventListener('keyup', (e) => {
 function update() {
     if ([5, 10, 15].includes(state.level) && (!state.boss || !state.boss.active) && !state.bossIntroActive) {
         spawnBoss(state);
-        state.bossActive = true;
+        console.log("Boss creado:", state.boss);
         state.enemies = [];
         state.bossIntroActive = true;
         state.bossIntroTimer = 180; // 3 segundos si usas 60 FPS
         sonidoFondo.pause();
         sonidoBossIntro.play();
+        state.playerProjectiles.length = 0;
+        state.enemyProjectiles.length = 0;
+
     }
 
     if (state.bossIntroActive) {
@@ -250,6 +253,12 @@ function update() {
         }
         return;
     }
+    if (state.boss && state.boss.active) {
+        updateBoss(state);
+    }
+    console.log("Boss Intro Active:", state.bossIntroActive);
+    console.log("Boss Active:", state.bossActive);
+
     if (state.bossDefeatedActive) {
         state.bossDefeatedTimer--;
         if (state.bossDefeatedTimer <= 0) {
@@ -324,16 +333,19 @@ function update() {
             // Aquí podrías poner un sonido de victoria si quieres
         }
     });
-    if (state.bossActive) {
-        updateBoss(state.canvas.width, state);
+    if (state.bossActive && !state.bossIntroActive) {
+        updateBoss(state);
+
         if (state.bossProjectiles) {
             for (let i = state.bossProjectiles.length - 1; i >= 0; i--) {
                 const p = state.bossProjectiles[i];
                 p.y += p.speedY;
+
                 if (p.y > state.canvas.height) {
                     state.bossProjectiles.splice(i, 1);
                     continue;
                 }
+
                 if (!state.isInvulnerable && checkCollision(p, state.player)) {
                     state.bossProjectiles.splice(i, 1);
                     i--;
@@ -366,11 +378,11 @@ function update() {
 
                     break;
                 }
-
             }
         }
+    }
 
-    } else {
+    else {
         state.enemySpawnTimer++;
         if (state.enemySpawnTimer >= state.enemySpawnInterval) {
             spawnEnemyGroup(state.canvas.width, state.canvas.height, state);
@@ -417,9 +429,6 @@ function draw() {
     drawPlayerProjectiles(state);
     drawEnemyProjectiles(ctx, state);
     drawEnemies(ctx, state);
-    if (state.bossActive) {
-        updateBoss(state);
-    }
     drawBoss(ctx, state);
     drawBossProjectiles(ctx, state);
     drawPowerUps(ctx, state);
@@ -537,11 +546,6 @@ function draw() {
     }
 
 }
-
-
-
-
-
 
 canvas.addEventListener('mousedown', (event) => {
     const rect = canvas.getBoundingClientRect();
