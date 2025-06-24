@@ -1,4 +1,3 @@
-// ui.js
 import { maybeSpawnPowerUpForLevel, powerUps } from './powerups.js';
 
 export const GAME_STATE = {
@@ -84,6 +83,7 @@ export function drawCommands(ctx, canvas) {
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     ctx.fillRect(canvas.width / 4, canvas.height * 0.8, canvas.width / 2, 50);
+    
     ctx.fillStyle = 'white';
     ctx.font = '24px Arial';
     ctx.fillText('VOLVER AL MENÚ', canvas.width / 2, canvas.height * 0.8 + 35);

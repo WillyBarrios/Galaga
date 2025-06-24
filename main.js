@@ -13,6 +13,7 @@ import {
     GAME_STATE,
     drawMainMenu,
     drawCredits,
+    drawCommands,
     drawGameOver,
     startGame,
     checkLevelProgress
@@ -396,20 +397,8 @@ for (let i = 0; i < state.playerLives; i++) {
 
 
 
-function gameLoop() {
-    if (state.currentGameState === GAME_STATE.MENU) {
-        drawMainMenu(ctx, canvas);
-    } else if (state.currentGameState === GAME_STATE.CREDITS) {
-        drawCredits(ctx, canvas);
-    } else if (state.currentGameState === GAME_STATE.GAME_OVER) {
-        drawGameOver(ctx, canvas);
-    } else {
-        update();
-        draw();
-    }
 
-    requestAnimationFrame(gameLoop);
-}
+
 
 canvas.addEventListener('mousedown', (event) => {
     const rect = canvas.getBoundingClientRect();
@@ -464,11 +453,26 @@ function salirAlMenu() {
     state.enemies.length = 0;
     state.showExitConfirm = false;
 }
+
+function gameLoop() {
+    if (state.currentGameState === GAME_STATE.MENU) {
+        drawMainMenu(ctx, canvas);
+    } else if (state.currentGameState === GAME_STATE.CREDITS) {
+        drawCredits(ctx, canvas);
+    } else if (state.currentGameState === GAME_STATE.COMMANDS) {
+        drawCommands(ctx, canvas); // ✅ Pantalla de comandos
+    } else if (state.currentGameState === GAME_STATE.GAME_OVER) {
+        drawGameOver(ctx, canvas);
+    } else {
+        update();
+        draw();
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
 gameLoop();
 
-if (state.currentGameState === GAME_STATE.COMMANDS) {
-    drawCommands(ctx, canvas);
-}
 
 export {
     sonidoCohete,
@@ -476,3 +480,4 @@ export {
     sonidoPunto,
     activarMusicaTemporal
 };
+
