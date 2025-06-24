@@ -19,7 +19,8 @@ import {
 } from './Game/ui.js';
 
 import {
-    handleCollisions
+    handleCollisions,
+    checkCollision
 } from './Game/collisions.js';
 
 import {
@@ -46,6 +47,15 @@ import {
     drawPlayerProjectiles,
     drawEnemyProjectiles
 } from './Game/projectile.js';
+import {
+    spawnBoss,
+    updateBoss,
+    drawBoss,
+    drawBossProjectiles
+} from './Game/boss.js';
+
+const sonidoBossIntro = new Audio('audio/boss.mp3');
+
 
 // === SONIDOS ===
 const sonidoDisparo = new Audio('audio/sonido de laser.mp3');
@@ -130,11 +140,18 @@ export const state = {
     returningToBottom: false,
     lifeLostTimer: 0,
     lifeLostTimerMax: 0,
+    bossDefeatedActive: false,
+    bossDefeatedTimer: 0,
+
     powerUpTimers: {
         invulnerability: 0,
         tripleShot: 0,
         superMove: 0
-    }
+    },
+    bossIntroActive: false,
+    bossIntroTimer: 0,
+
+
 };
 
 function shootTriple(state) {
@@ -169,8 +186,8 @@ document.addEventListener('keydown', (e) => {
     }
 
     if (state.currentGameState === GAME_STATE.COMMANDS && e.key.toLowerCase() === 'k') {
-    state.currentGameState = GAME_STATE.MENU;
-}
+        state.currentGameState = GAME_STATE.MENU;
+    }
 
 
     if (state.currentGameState === GAME_STATE.MENU && e.key === ' ') {
@@ -212,6 +229,36 @@ document.addEventListener('keyup', (e) => {
 });
 
 function update() {
+    if ([5, 10, 15].includes(state.level) && (!state.boss || !state.boss.active) && !state.bossIntroActive) {
+        spawnBoss(state);
+        state.bossActive = true;
+        state.enemies = [];
+        state.bossIntroActive = true;
+        state.bossIntroTimer = 180; // 3 segundos si usas 60 FPS
+        sonidoFondo.pause();
+        sonidoBossIntro.play();
+    }
+
+    if (state.bossIntroActive) {
+        state.bossIntroTimer--;
+        if (state.bossIntroTimer <= 0) {
+            state.bossIntroActive = false;
+            sonidoBossIntro.pause();
+            sonidoBossIntro.currentTime = 0;
+            sonidoFondo.play();
+        }
+        return;
+    }
+    if (state.bossDefeatedActive) {
+        state.bossDefeatedTimer--;
+        if (state.bossDefeatedTimer <= 0) {
+            state.bossDefeatedActive = false;
+            state.isPaused = false;
+            sonidoFondo.play();
+        }
+        return; // Detener updates mientras mostramos el mensaje
+    }
+
     if (state.lifeLostActive) {
         state.lifeLostTimer--;
         if (state.lifeLostTimer <= 0) {
@@ -265,35 +312,99 @@ function update() {
             state.score += 100;
             sonidoExplosion.currentTime = 0;
             sonidoExplosion.play();
+        },
+        onBossDefeated: () => {
+            state.bossDefeatedActive = true;
+            state.bossDefeatedTimer = 180;
+            state.isPaused = true;
+            sonidoFondo.pause();
+            sonidoFondo.currentTime = 0;
+            console.log("✅ Boss derrotado, muestra mensaje");
+            // Aquí podrías poner un sonido de victoria si quieres
         }
     });
+    if (state.bossActive) {
+        updateBoss(state.canvas.width, state);
+        if (state.bossProjectiles) {
+            for (let i = state.bossProjectiles.length - 1; i >= 0; i--) {
+                const p = state.bossProjectiles[i];
+                p.y += p.speedY;
+                if (p.y > state.canvas.height) {
+                    state.bossProjectiles.splice(i, 1);
+                    continue;
+                }
+                if (!state.isInvulnerable && checkCollision(p, state.player)) {
+                    state.bossProjectiles.splice(i, 1);
+                    i--;
 
-    state.enemySpawnTimer++;
-    if (state.enemySpawnTimer >= state.enemySpawnInterval) {
-        spawnEnemyGroup(state.canvas.width, state.canvas.height, state);
-        state.enemySpawnTimer = 0;
+                    if (!state.isImmortal) {
+                        state.playerLives--;
+                        if (state.playerLives <= 0) {
+                            state.currentGameState = GAME_STATE.GAME_OVER;
+                            sonidoFondo.pause();
+                            sonidoGameOver.currentTime = 0;
+                            sonidoGameOver.play();
+
+                            const saved = JSON.parse(localStorage.getItem('galagaHighScore')) || { score: 0 };
+                            if (state.score > saved.score) {
+                                localStorage.setItem('galagaHighScore', JSON.stringify({
+                                    username: state.username,
+                                    score: state.score
+                                }));
+                                console.log(`🎉 Nuevo puntaje máximo: ${state.score}`);
+                            }
+                        } else {
+                            state.lifeLostActive = true;
+                            state.lifeLostTimer = 60;
+                            state.lifeLostTimerMax = 60;
+                        }
+                    }
+
+                    sonidoExplosion.currentTime = 0;
+                    sonidoExplosion.play();
+
+                    break;
+                }
+
+            }
+        }
+
+    } else {
+        state.enemySpawnTimer++;
+        if (state.enemySpawnTimer >= state.enemySpawnInterval) {
+            spawnEnemyGroup(state.canvas.width, state.canvas.height, state);
+            state.enemySpawnTimer = 0;
+        }
     }
 
-    state.enemyShootTimer++;
-    if (state.enemyShootTimer >= state.baseEnemyShootInterval) {
-        const vivos = state.enemies.filter(e => e.alive);
-        if (vivos.length > 0) {
-            const enemigo = vivos[Math.floor(Math.random() * vivos.length)];
-            enemyShoot(enemigo, state);
+    if (!state.bossActive) {
+        state.enemyShootTimer++;
+        if (state.enemyShootTimer >= state.baseEnemyShootInterval) {
+
+            const vivos = state.enemies.filter(e => e.alive);
+            if (vivos.length > 0) {
+                const enemigo = vivos[Math.floor(Math.random() * vivos.length)];
+                enemyShoot(enemigo, state);
+            }
+            state.enemyShootTimer = 0;
         }
-        state.enemyShootTimer = 0;
     }
 
     state.gameTime++;
     checkLevelProgress(state);
     if (state.returningToBottom) {
-    state.player.y += 5; // velocidad de descenso
-    if (state.player.y >= state.canvas.height - state.player.height - 20) {
-        state.player.y = state.canvas.height - state.player.height - 20;
-        state.returningToBottom = false;
-        // La invulnerabilidad terminará por el propio temporizador que ya tienes
+        state.player.y += 5; // velocidad de descenso
+        if (state.player.y >= state.canvas.height - state.player.height - 20) {
+            state.player.y = state.canvas.height - state.player.height - 20;
+            state.returningToBottom = false;
+            // La invulnerabilidad terminará por el propio temporizador que ya tienes
+        }
     }
-}
+    if (state.level >= 15) {
+        state.invertedControls = true;
+    } else {
+        state.invertedControls = false;
+    }
 
 }
 
@@ -305,6 +416,11 @@ function draw() {
     drawPlayerProjectiles(state);
     drawEnemyProjectiles(ctx, state);
     drawEnemies(ctx, state);
+    if (state.bossActive) {
+        updateBoss(state);
+    }
+    drawBoss(ctx, state);
+    drawBossProjectiles(ctx, state);
     drawPowerUps(ctx, state);
 
     // === HUD: Fijo a la izquierda ===
@@ -317,13 +433,13 @@ function draw() {
 
     ctx.fillText(`Puntos: ${state.score}`, x, y);
     y += 20;
-   ctx.fillText("Vidas:", x, y);
+    ctx.fillText("Vidas:", x, y);
 
-let heartX = x + 60; // posición inicial para los corazones (separado del texto "Vidas:")
-for (let i = 0; i < state.playerLives; i++) {
-    ctx.fillText("❤️", heartX + i * 22, y); // dibuja un corazón por vida
-}
-;
+    let heartX = x + 60; // posición inicial para los corazones (separado del texto "Vidas:")
+    for (let i = 0; i < state.playerLives; i++) {
+        ctx.fillText("❤️", heartX + i * 22, y); // dibuja un corazón por vida
+    }
+    ;
     y += 20;
     ctx.fillText(`Nivel: ${state.level}`, x, y);
     y += 20;
@@ -362,9 +478,19 @@ for (let i = 0; i < state.playerLives; i++) {
         ctx.fillText('¡Vida perdida!', canvas.width / 2, canvas.height / 2);
         ctx.restore();
     }
+    if (state.bossDefeatedActive) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('✅ ¡La nave nodriza ha sido destruida!', canvas.width / 2, canvas.height / 2);
+        ctx.restore();
+    }
     // === Cartel de confirmación de salida ===
-    if (state.showExitConfirm) {
+    else if (state.showExitConfirm) {
         ctx.save();
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -378,7 +504,6 @@ for (let i = 0; i < state.playerLives; i++) {
         ctx.fillText('Presiona Y para confirmar o N para cancelar.', canvas.width / 2, canvas.height / 2 + 40);
         ctx.restore();
     }
-
     // === Cartel de pausa normal ===
     else if (state.isPaused) {
         ctx.save();
@@ -391,7 +516,25 @@ for (let i = 0; i < state.playerLives; i++) {
         ctx.restore();
     }
 
-    
+
+    if (state.bossIntroActive) {
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('¡Se acerca una nave nodriza!', canvas.width / 2, canvas.height / 2);
+    }
+
+    if (state.bossProjectiles) {
+        for (let i = 0; i < state.bossProjectiles.length; i++) {
+            const p = state.bossProjectiles[i];
+            p.y += p.speedY;
+            if (p.y > state.canvas.height) {
+                state.bossProjectiles.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
 }
 
 
