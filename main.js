@@ -617,21 +617,21 @@ function gameLoop() {
 
     requestAnimationFrame(gameLoop);
 }document.getElementById('leftBtn').addEventListener('mousedown', () => {
-    keys['ArrowLeft'] = true;
+    keys['ArrowLeft'] = true; //Boton izquierdo
 });
 document.getElementById('leftBtn').addEventListener('mouseup', () => {
     keys['ArrowLeft'] = false;
 });
 
 document.getElementById('rightBtn').addEventListener('mousedown', () => {
-    keys['ArrowRight'] = true;
+    keys['ArrowRight'] = true; // Boton derecho
 });
 document.getElementById('rightBtn').addEventListener('mouseup', () => {
     keys['ArrowRight'] = false;
 });
 
 document.getElementById('shootBtn').addEventListener('click', () => {
-    shoot(state);
+    shoot(state); // Botón de disparo
 });
 canvas.addEventListener('touchmove', (event) => {
     const touchX = event.touches[0].clientX;
