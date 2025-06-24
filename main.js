@@ -616,8 +616,27 @@ function gameLoop() {
     }
 
     requestAnimationFrame(gameLoop);
-}
+}document.getElementById('leftBtn').addEventListener('mousedown', () => {
+    keys['ArrowLeft'] = true;
+});
+document.getElementById('leftBtn').addEventListener('mouseup', () => {
+    keys['ArrowLeft'] = false;
+});
 
+document.getElementById('rightBtn').addEventListener('mousedown', () => {
+    keys['ArrowRight'] = true;
+});
+document.getElementById('rightBtn').addEventListener('mouseup', () => {
+    keys['ArrowRight'] = false;
+});
+
+document.getElementById('shootBtn').addEventListener('click', () => {
+    shoot(state);
+});
+canvas.addEventListener('touchmove', (event) => {
+    const touchX = event.touches[0].clientX;
+    player.x = touchX - player.width / 2;
+});
 gameLoop();
 
 
