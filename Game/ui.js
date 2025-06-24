@@ -1,3 +1,4 @@
+//ui.js
 import { maybeSpawnPowerUpForLevel, powerUps } from './powerups.js';
 
 export const GAME_STATE = {

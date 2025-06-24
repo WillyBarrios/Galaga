@@ -1,4 +1,4 @@
-// Imagen del boss (puedes cambiar la ruta por tu sprite cuando quieras)
+//boss.js
 const bossImage = new Image();
 bossImage.src = 'assets/boss.png';  // Cambia a tu sprite
 
