@@ -7,7 +7,7 @@ export const player = {
     y: 0,
     width: 32,
     height: 32,
-    speed: 4,
+    speed: 4, //Ajustar aqui la velocidad del jugador
     image: playerImage
 };
 
