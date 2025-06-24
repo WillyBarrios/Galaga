@@ -616,24 +616,44 @@ function gameLoop() {
     }
 
     requestAnimationFrame(gameLoop);
-}document.getElementById('leftBtn').addEventListener('mousedown', () => {
-    keys['ArrowLeft'] = true; //Boton izquierdo
+}
+// Botón izquierdo
+const leftBtn = document.getElementById('leftBtn');
+leftBtn.addEventListener('mousedown', () => { keys['ArrowLeft'] = true; });
+leftBtn.addEventListener('mouseup', () => { keys['ArrowLeft'] = false; });
+leftBtn.addEventListener('touchstart', (e) => { 
+    e.preventDefault(); // Previene el comportamiento por defecto (como zoom)
+    keys['ArrowLeft'] = true; 
 });
-document.getElementById('leftBtn').addEventListener('mouseup', () => {
-    keys['ArrowLeft'] = false;
+leftBtn.addEventListener('touchend', (e) => { 
+    e.preventDefault();
+    keys['ArrowLeft'] = false; 
 });
 
-document.getElementById('rightBtn').addEventListener('mousedown', () => {
-    keys['ArrowRight'] = true; // Boton derecho
+// Botón derecho
+const rightBtn = document.getElementById('rightBtn');
+rightBtn.addEventListener('mousedown', () => { keys['ArrowRight'] = true; });
+rightBtn.addEventListener('mouseup', () => { keys['ArrowRight'] = false; });
+rightBtn.addEventListener('touchstart', (e) => { 
+    e.preventDefault();
+    keys['ArrowRight'] = true; 
 });
-document.getElementById('rightBtn').addEventListener('mouseup', () => {
-    keys['ArrowRight'] = false;
+rightBtn.addEventListener('touchend', (e) => { 
+    e.preventDefault();
+    keys['ArrowRight'] = false; 
 });
 
-document.getElementById('shootBtn').addEventListener('click', () => {
-    shoot(state); // Botón de disparo
+// Botón de disparo
+const shootBtn = document.getElementById('shootBtn');
+shootBtn.addEventListener('click', () => { shoot(state); });
+shootBtn.addEventListener('touchend', (e) => { 
+    e.preventDefault();
+    shoot(state); 
 });
+
+// Movimiento táctil en el canvas (si lo necesitas)
 canvas.addEventListener('touchmove', (event) => {
+    event.preventDefault(); // Previene el scroll
     const touchX = event.touches[0].clientX;
     player.x = touchX - player.width / 2;
 });
