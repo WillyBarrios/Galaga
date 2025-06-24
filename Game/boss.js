@@ -71,7 +71,7 @@ export function bossShoot(state) {
         width: 20,
         height: 20,
         speedY: 4,
-        color: 'orange'
+        color: 'yellow',
     };
 
     if (!state.bossProjectiles) {
