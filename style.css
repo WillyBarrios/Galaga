@@ -1,63 +1,58 @@
-
-
- #gameCanvas {
-    background-color: #111; /* Un gris oscuro para el fondo del juego inicialmente */
-    border: 1px solid #fff; /* Un borde para visualizar el canvas */
-
+/* Estilo para el canvas del juego */
+#gameCanvas {
+    background-color: #111; /* Fondo gris oscuro para el área de juego */
+    border: 1px solid #fff; /* Borde blanco para delimitar el canvas */
 }
 
+/* Contenedor de los controles táctiles (botones de movimiento y disparo) */
 .controls {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
+    position: fixed;              /* Fijo en la pantalla, no se mueve al hacer scroll */
+    bottom: 20px;                 /* Separado 20px del borde inferior */
+    left: 50%;                    /* Centrado horizontalmente */
+    transform: translateX(-50%);  /* Ajuste para centrar exactamente */
+    display: flex;                /* Usa flexbox para alinear los botones */
+    gap: 20px;                    /* Espacio entre los botones */
 }
 
-
-
+/* Estilo general del body de la página */
 body {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: black;
-    height: 100vh;
-    touch-action: none;
+    margin: 0;                    /* Sin margen exterior */
+    display: flex;                /* Flexbox para centrar contenido */
+    flex-direction: column;       /* Elementos en columna */
+    align-items: center;          /* Centrado horizontal */
+    background: black;            /* Fondo negro */
+    height: 100vh;                /* Ocupa toda la altura de la ventana */
+    touch-action: none;           /* Evita gestos táctiles por defecto */
 }
 
-.controls {
-    position: fixed;
-    bottom: 20px;
-    display: flex;
-    gap: 20px;
-}
-
+/* Estilo para los botones de control (izquierda, disparo, derecha) */
 .control-btn {
     width: 60px;
     height: 60px;
-    border-radius: 50%;
+    border-radius: 50%;                       /* Botón circular */
     border: none;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);     /* Fondo blanco semitransparente */
     color: white;
     font-size: 24px;
-    touch-action: none;
+    touch-action: none;                       /* Evita gestos táctiles por defecto */
 }
 
+/* Botón de reinicio (aparece tras Game Over) */
 #btnRestart {
     position: absolute;
-    display: none;
+    display: none;                            /* Oculto por defecto */
     padding: 12px 20px;
     font-size: 18px;
-    z-index: 1000;
+    z-index: 1000;                            /* Encima de otros elementos */
     background-color: #fff;
     border: 2px solid #000;
     border-radius: 8px;
     cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.3); /* Fondo blanco semitransparente */
     color: white;
 }
+
+/* Opciones móviles (pausa y salir) */
 .mobile-options {
   display: flex;
   justify-content: center;
@@ -65,6 +60,7 @@ body {
   margin-top: 5px;
 }
 
+/* Estilo para los botones de opciones móviles */
 .mobile-options button {
   opacity: 0.6;
   background-color: #222;
@@ -75,23 +71,26 @@ body {
   border-radius: 8px;
 }
 
+/* Oculta las opciones móviles en pantallas grandes */
 @media (min-width: 769px) {
   .mobile-options {
     display: none;
   }
 }
+
+/* Contenedor de los botones de confirmación de salida */
 .exit-confirm-buttons {
   position: absolute;
-  top: 50%; /* Aproximadamente al centro vertical del canvas */
+  top: 50%; /* Centrado verticalmente */
   left: 50%;
   transform: translate(-50%, 0);
-  display: none;
+  display: none; /* Oculto por defecto */
   gap: 10px;
   flex-direction: row;
   z-index: 10;
 }
 
-/* Estilo para los botones */
+/* Estilo para los botones de confirmación de salida */
 .exit-confirm-buttons button {
   font-size: 16px;
   padding: 8px 12px;
@@ -103,11 +102,9 @@ body {
   cursor: pointer;
 }
 
-/* Solo visible en pantallas móviles */
+/* Muestra los botones de confirmación solo en móviles cuando tienen la clase 'show' */
 @media (max-width: 768px) {
   .exit-confirm-buttons.show {
     display: flex;
   }
 }
-
-

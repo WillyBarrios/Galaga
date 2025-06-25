@@ -1,24 +1,30 @@
 // player.js
+
+// Carga la imagen del jugador
 const playerImage = new Image();
 playerImage.src = 'assets/Diseño sin título/1.png';
 
+// Objeto jugador con sus propiedades iniciales
 export const player = {
-    x: 0, // se inicializa en main.js para adaptarse al tamaño del canvas
+    x: 0, // Se inicializa en main.js para adaptarse al tamaño del canvas
     y: 0,
     width: 32,
     height: 32,
-    speed: 4, //Ajustar aqui la velocidad del jugador
+    speed: 4, // Ajustar aquí la velocidad del jugador
     image: playerImage
 };
 
+// Inicializa la posición del jugador en el canvas (centrado abajo)
 export function initPlayer(canvas) {
     player.x = canvas.width / 2 - player.width / 2;
     player.y = canvas.height - player.height - 20;
 }
 
+// Mueve al jugador según las teclas presionadas y el estado del juego
 export function movePlayer(keys, state) {
     const { player, canvas, superMove } = state;
 
+    // Movimiento horizontal básico
     if (keys['ArrowLeft'] || keys['a']) {
         player.x -= player.speed;
         if (player.x < 0) player.x = 0;
@@ -30,6 +36,7 @@ export function movePlayer(keys, state) {
         }
     }
 
+    // Movimiento vertical solo si está activo el super-move (power-up)
     if (superMove) {
         if (keys['ArrowUp'] || keys['w']) {
             player.y -= player.speed;
@@ -43,8 +50,10 @@ export function movePlayer(keys, state) {
         }
     }
 
+    // Inversión de controles en el nivel 15
     const invert = state.level === 15;
 
+    // Movimiento horizontal con inversión de controles si corresponde
     if ((keys['ArrowLeft'] || keys['a'])) {
         if (invert) {
             player.x += player.speed;
@@ -64,6 +73,7 @@ export function movePlayer(keys, state) {
         }
     }
 
+    // Movimiento vertical con inversión de controles si corresponde y super-move activo
     if (state.superMove) {
         if ((keys['ArrowUp'] || keys['w'])) {
             if (invert) {
@@ -84,8 +94,9 @@ export function movePlayer(keys, state) {
             }
         }
     }
-
 }
+
+// Dibuja la nave del jugador en el canvas
 export function drawPlayer(ctx, player) {
     if (player.image instanceof HTMLImageElement && player.image.complete) {
         ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
@@ -93,5 +104,3 @@ export function drawPlayer(ctx, player) {
         console.warn("⛔ Imagen del jugador no es válida todavía.");
     }
 }
-
- 

@@ -2,35 +2,40 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galaga</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8"> <!-- Define la codificación de caracteres como UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Hace la página responsive -->
+    <title>Galaga</title> <!-- Título de la pestaña del navegador -->
+    <link rel="stylesheet" href="style.css"> <!-- Enlaza la hoja de estilos CSS -->
 </head>
 
 <body>
+    <!-- Canvas donde se dibuja el juego -->
     <canvas id="gameCanvas"></canvas>
+
+    <!-- Opciones móviles: botones de pausa y salir -->
     <div class="mobile-options">
-        <button id="pauseBtn">⏸️</button>
-        <button id="exitBtn">⏏️</button>
+        <button id="pauseBtn">⏸️</button> <!-- Botón para pausar/reanudar el juego -->
+        <button id="exitBtn">⏏️</button>   <!-- Botón para salir al menú principal -->
     </div>
+
+    <!-- Controles táctiles para móviles -->
     <div class="controls">
-        <button id="leftBtn" class="control-btn">←</button>
-        <button id="shootBtn" class="control-btn">🔫</button>
-        <button id="rightBtn" class="control-btn">→</button>
-
+        <button id="leftBtn" class="control-btn">←</button>   <!-- Botón para mover a la izquierda -->
+        <button id="shootBtn" class="control-btn">🔫</button> <!-- Botón para disparar -->
+        <button id="rightBtn" class="control-btn">→</button>  <!-- Botón para mover a la derecha -->
     </div>
+
+    <!-- Confirmación de salida: aparece al intentar salir durante el juego -->
     <div class="exit-confirm-buttons">
-        <button id="btnExitYes">✔ Aceptar</button>
-        <button id="btnExitNo">✖ Cancelar</button>
+        <button id="btnExitYes">✔ Aceptar</button>   <!-- Botón para confirmar salida -->
+        <button id="btnExitNo">✖ Cancelar</button>   <!-- Botón para cancelar salida -->
     </div>
 
+    <!-- Botón para reiniciar el juego tras Game Over -->
     <button id="btnRestart">VOLVER A JUGAR</button>
+
+    <!-- Script principal del juego (usa módulos ES6) -->
     <script type="module" src="main.js"></script>
-
-
-
-
 </body>
 
 </html>
