@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-// Importamos funciones y variables necesarias del archivo powerups.js
-=======
 //ui.js
->>>>>>> cc64064a680124687dd1ec28f295f7883e0da85e
 import { maybeSpawnPowerUpForLevel, powerUps } from './powerups.js';
 
 // Definimos los distintos estados que puede tener el juego
@@ -16,19 +12,12 @@ export const GAME_STATE = {
 
 // Dibuja el menú principal en pantalla
 export function drawMainMenu(ctx, canvas) {
-<<<<<<< HEAD
-    ctx.fillStyle = 'black'; // Fondo negro
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = 'white'; // Texto blanco
-=======
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = 'white';
     ctx.font = '36px Arial';
->>>>>>> cc64064a680124687dd1ec28f295f7883e0da85e
     ctx.textAlign = 'center';
     ctx.fillText('GALAGA', canvas.width / 2, canvas.height * 0.2); // 👈 Título más arriba
 
@@ -38,15 +27,6 @@ export function drawMainMenu(ctx, canvas) {
 
     // Botón "INICIAR JUEGO"
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-<<<<<<< HEAD
-    ctx.fillRect(canvas.width / 4, canvas.height * 0.6, canvas.width / 2, 50);
-    ctx.fillStyle = 'white';
-    ctx.fillText('INICIAR JUEGO', canvas.width / 2, canvas.height * 0.6 + 35);
-
-    // Botón "VER COMANDOS"
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.fillRect(canvas.width / 4, canvas.height * 0.7, canvas.width / 2, 50);
-=======
     ctx.fillRect(canvas.width / 4, canvas.height * 0.45, canvas.width / 2, 50);
     ctx.fillStyle = 'white';
     ctx.fillText('INICIAR JUEGO', canvas.width / 2, canvas.height * 0.45 + 35);
@@ -54,7 +34,6 @@ export function drawMainMenu(ctx, canvas) {
     // Botón "VER COMANDOS"
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     ctx.fillRect(canvas.width / 4, canvas.height * 0.55, canvas.width / 2, 50);
->>>>>>> cc64064a680124687dd1ec28f295f7883e0da85e
     ctx.fillStyle = 'white';
     ctx.fillText('VER COMANDOS', canvas.width / 2, canvas.height * 0.55 + 35);
 
@@ -65,11 +44,6 @@ export function drawMainMenu(ctx, canvas) {
     ctx.fillText('VER CRÉDITOS', canvas.width / 2, canvas.height * 0.65 + 35);
 }
 
-<<<<<<< HEAD
-// Dibuja la pantalla de créditos del juego
-=======
-
->>>>>>> cc64064a680124687dd1ec28f295f7883e0da85e
 export function drawCredits(ctx, canvas) {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
