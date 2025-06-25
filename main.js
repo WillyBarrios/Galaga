@@ -71,6 +71,23 @@ const sonidoPunto = new Audio('audio/sonido_punto.mp3');
 
 sonidoFondo.loop = true;
 sonidoEspecial.loop = false;
+const btnRestart = document.getElementById('btnRestart');
+
+btnRestart.addEventListener('click', () => {
+    reiniciarJuego();
+});
+
+btnRestart.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    reiniciarJuego();
+});
+
+
+function reiniciarJuego() {
+    btnRestart.style.display = 'none';
+    startGame(state);
+    sonidoFondo.play();
+}
 
 let musicaTemporalActiva = null;
 
@@ -201,6 +218,8 @@ document.addEventListener('keydown', (e) => {
     } else if (state.currentGameState === GAME_STATE.GAME_OVER && e.key === ' ') {
         sonidoFondo.play();
         startGame(state);
+
+
     } else if (state.currentGameState === GAME_STATE.PLAYING && e.key === ' ' && !state.isPaused) {
         if (state.tripleShot) {
             shootTriple(state);
@@ -256,8 +275,8 @@ function update() {
     if (state.boss && state.boss.active) {
         updateBoss(state);
     }
-    console.log("Boss Intro Active:", state.bossIntroActive);
-    console.log("Boss Active:", state.bossActive);
+    /*console.log("Boss Intro Active:", state.bossIntroActive);
+    console.log("Boss Active:", state.bossActive);*/
 
     if (state.bossDefeatedActive) {
         state.bossDefeatedTimer--;
@@ -300,7 +319,7 @@ function update() {
                     sonidoFondo.pause();
                     sonidoGameOver.currentTime = 0;
                     sonidoGameOver.play();
-
+                    btnRestart.style.display = 'block';
                     const saved = JSON.parse(localStorage.getItem('galagaHighScore')) || { score: 0 };
                     if (state.score > saved.score) {
                         localStorage.setItem('galagaHighScore', JSON.stringify({
@@ -604,51 +623,64 @@ function salirAlMenu() {
 function gameLoop() {
     if (state.currentGameState === GAME_STATE.MENU) {
         drawMainMenu(ctx, canvas);
+        btnRestart.style.display = 'none';
     } else if (state.currentGameState === GAME_STATE.CREDITS) {
         drawCredits(ctx, canvas);
+        btnRestart.style.display = 'none';
     } else if (state.currentGameState === GAME_STATE.COMMANDS) {
-        drawCommands(ctx, canvas); // ✅ Pantalla de comandos
+        drawCommands(ctx, canvas);
+        btnRestart.style.display = 'none';
     } else if (state.currentGameState === GAME_STATE.GAME_OVER) {
         drawGameOver(ctx, canvas);
+
+        // Asegura que el botón se muestre y se posicione correctamente
+        const rect = canvas.getBoundingClientRect();
+        btnRestart.style.position = 'absolute';
+        btnRestart.style.left = `${rect.left + rect.width / 2}px`;
+        btnRestart.style.top = `${rect.top + rect.height / 2 + 80}px`;
+        btnRestart.style.transform = 'translate(-50%, 0)';
+        btnRestart.style.display = 'block';
     } else {
         update();
         draw();
+        btnRestart.style.display = 'none';
     }
 
     requestAnimationFrame(gameLoop);
 }
+
 // Botón izquierdo
 const leftBtn = document.getElementById('leftBtn');
 leftBtn.addEventListener('mousedown', () => { keys['ArrowLeft'] = true; });
 leftBtn.addEventListener('mouseup', () => { keys['ArrowLeft'] = false; });
-leftBtn.addEventListener('touchstart', (e) => { 
+leftBtn.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Previene el comportamiento por defecto (como zoom)
-    keys['ArrowLeft'] = true; 
+    keys['ArrowLeft'] = true;
 });
-leftBtn.addEventListener('touchend', (e) => { 
+leftBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
-    keys['ArrowLeft'] = false; 
+    keys['ArrowLeft'] = false;
 });
 
 // Botón derecho
 const rightBtn = document.getElementById('rightBtn');
 rightBtn.addEventListener('mousedown', () => { keys['ArrowRight'] = true; });
 rightBtn.addEventListener('mouseup', () => { keys['ArrowRight'] = false; });
-rightBtn.addEventListener('touchstart', (e) => { 
+rightBtn.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    keys['ArrowRight'] = true; 
+    keys['ArrowRight'] = true;
 });
-rightBtn.addEventListener('touchend', (e) => { 
+rightBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
-    keys['ArrowRight'] = false; 
+    keys['ArrowRight'] = false;
 });
 
 // Botón de disparo
 const shootBtn = document.getElementById('shootBtn');
 shootBtn.addEventListener('click', () => { shoot(state); });
-shootBtn.addEventListener('touchend', (e) => { 
+shootBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
-    shoot(state); 
+    shoot(state);
 });
 
 // Movimiento táctil en el canvas (si lo necesitas)
