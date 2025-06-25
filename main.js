@@ -68,10 +68,25 @@ const sonidoEspecial = new Audio('audio/sonido de estrella.mp3');
 const sonidoCohete = new Audio('audio/sonido_cohete.mp3');
 const sonidoLuna = new Audio('audio/sonido_luna.mp3');
 const sonidoPunto = new Audio('audio/sonido_punto.mp3');
-
+const pauseBtn = document.getElementById('pauseBtn');
 sonidoFondo.loop = true;
 sonidoEspecial.loop = false;
 const btnRestart = document.getElementById('btnRestart');
+
+pauseBtn.addEventListener('click', () => {
+    if (state.currentGameState === GAME_STATE.PLAYING) {
+        state.isPaused = !state.isPaused;
+        console.log(state.isPaused ? '⏸️ Juego en pausa' : '▶️ Juego reanudado');
+        if (state.isPaused) {
+            sonidoFondo.pause();
+            if (musicaTemporalActiva) musicaTemporalActiva.pause();
+        } else {
+            if (!musicaTemporalActiva) sonidoFondo.play();
+            else musicaTemporalActiva.play();
+        }
+    }
+});
+
 
 btnRestart.addEventListener('click', () => {
     reiniciarJuego();
@@ -698,4 +713,3 @@ export {
     sonidoPunto,
     activarMusicaTemporal
 };
-
