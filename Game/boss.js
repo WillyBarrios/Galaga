@@ -1,4 +1,4 @@
-// Imagen del boss (puedes cambiar la ruta por tu sprite cuando quieras)
+//boss.js
 const bossImage = new Image();
 bossImage.src = 'assets/boss.png';  // Cambia a tu sprite
 
@@ -14,11 +14,19 @@ export function spawnBoss(state) {
         active: true
     };
     state.bossActive = true;
-    console.log("🚀 Boss generado");
+console.log("🚀 spawnBoss fue llamado");
+console.log("Boss generado:", state.boss);
+
 }
 
 export function updateBoss(state) {
-    if (!state.boss || !state.boss.active || state.isPaused) return;
+    console.log("Boss object:", state.boss);
+    console.log("Boss active:", state.boss?.active);
+
+    if (!state.boss || !state.boss.active || state.isPaused) {
+        console.log("⛔ updateBoss no hace nada (pausa, boss inactivo o no existe)");
+        return;
+    }
 
     const boss = state.boss;
     boss.x += boss.speedX;
@@ -26,13 +34,15 @@ export function updateBoss(state) {
     if (boss.x < 0 || boss.x + boss.width > state.canvas.width) {
         boss.speedX *= -1;
     }
+
     if (!boss.shootTimer) boss.shootTimer = 0;
     boss.shootTimer++;
-    if (boss.shootTimer >= 90) { // dispara cada 1.5s aprox (60 FPS)
+    if (boss.shootTimer >= 90) {
         bossShoot(state);
         boss.shootTimer = 0;
     }
 }
+
 
 export function drawBoss(ctx, state) {
     const boss = state.boss;
@@ -71,7 +81,7 @@ export function bossShoot(state) {
         width: 20,
         height: 20,
         speedY: 4,
-        color: 'orange'
+        color: 'yellow',
     };
 
     if (!state.bossProjectiles) {

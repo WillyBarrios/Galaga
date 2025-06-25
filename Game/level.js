@@ -1,3 +1,4 @@
+//level.js
 export function increaseLevel(state) {
     state.level++;
     console.log(`⏫ Nivel aumentado a: ${state.level}`);

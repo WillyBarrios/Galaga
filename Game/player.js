@@ -86,9 +86,6 @@ export function movePlayer(keys, state) {
     }
 
 }
-
-
-
 export function drawPlayer(ctx, player) {
     if (player.image instanceof HTMLImageElement && player.image.complete) {
         ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
@@ -97,4 +94,4 @@ export function drawPlayer(ctx, player) {
     }
 }
 
-
+ 

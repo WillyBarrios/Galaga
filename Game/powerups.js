@@ -5,7 +5,7 @@ import {
     sonidoCohete,
     sonidoLuna,
     sonidoPunto
-} from '../main.js'; 
+} from '../main.js';
 
 // === IMÁGENES DE POWERUPS ===
 const powerUpImages = {
@@ -76,19 +76,19 @@ export function updatePowerUps(state) {
         }
     }
 
-if (state.powerUpTimers.superMove > 0) {
-    state.powerUpTimers.superMove--;
-    if (state.powerUpTimers.superMove === 0) {
-        state.superMove = false;
+    if (state.powerUpTimers.superMove > 0) {
+        state.powerUpTimers.superMove--;
+        if (state.powerUpTimers.superMove === 0) {
+            state.superMove = false;
 
-        // Activar invulnerabilidad temporal al terminar superMove
-        state.isInvulnerable = true;
-        state.powerUpTimers.invulnerability = 120; // 2 segundos aprox (ajusta a gusto)
+            // Activar invulnerabilidad temporal al terminar superMove
+            state.isInvulnerable = true;
+            state.powerUpTimers.invulnerability = 120; // 2 segundos aprox (ajusta a gusto)
 
-        // Iniciar movimiento hacia abajo
-        state.returningToBottom = true;
+            // Iniciar movimiento hacia abajo
+            state.returningToBottom = true;
+        }
     }
-}
 
 }
 
@@ -131,9 +131,12 @@ function applyPowerUpEffect(state, powerUp) {
 
         case POWERUP_TYPES.SCORE:
             state.score += 250;
+            sonidoPunto.pause();          // Añade esto
             sonidoPunto.currentTime = 0;
-            sonidoPunto.play(); // Sonido corto, sin duración
+            sonidoPunto.play();
             break;
+
+
     }
 }
 

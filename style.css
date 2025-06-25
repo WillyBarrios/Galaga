@@ -1,9 +1,11 @@
 
 
-#gameCanvas {
+ #gameCanvas {
     background-color: #111; /* Un gris oscuro para el fondo del juego inicialmente */
     border: 1px solid #fff; /* Un borde para visualizar el canvas */
+
 }
+
 .controls {
     position: fixed;
     bottom: 20px;
@@ -42,3 +44,70 @@ body {
     font-size: 24px;
     touch-action: none;
 }
+
+#btnRestart {
+    position: absolute;
+    display: none;
+    padding: 12px 20px;
+    font-size: 18px;
+    z-index: 1000;
+    background-color: #fff;
+    border: 2px solid #000;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+.mobile-options {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.mobile-options button {
+  opacity: 0.6;
+  background-color: #222;
+  color: white;
+  border: none;
+  font-size: 20px;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+@media (min-width: 769px) {
+  .mobile-options {
+    display: none;
+  }
+}
+.exit-confirm-buttons {
+  position: absolute;
+  top: 50%; /* Aproximadamente al centro vertical del canvas */
+  left: 50%;
+  transform: translate(-50%, 0);
+  display: none;
+  gap: 10px;
+  flex-direction: row;
+  z-index: 10;
+}
+
+/* Estilo para los botones */
+.exit-confirm-buttons button {
+  font-size: 16px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #333;
+  color: white;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+/* Solo visible en pantallas móviles */
+@media (max-width: 768px) {
+  .exit-confirm-buttons.show {
+    display: flex;
+  }
+}
+
+
