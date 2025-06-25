@@ -1,23 +1,36 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galaga</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div class="mobile-options">
+        <button id="pauseBtn">⏸️</button>
+        <button id="exitBtn">⏏️</button>
+    </div>
     <div class="controls">
         <button id="leftBtn" class="control-btn">←</button>
         <button id="shootBtn" class="control-btn">🔫</button>
         <button id="rightBtn" class="control-btn">→</button>
-       
+
     </div>
+    <div class="exit-confirm-buttons">
+        <button id="btnExitYes">✔ Aceptar</button>
+        <button id="btnExitNo">✖ Cancelar</button>
+    </div>
+
     <button id="btnRestart">VOLVER A JUGAR</button>
     <script type="module" src="main.js"></script>
-    <button id="pauseBtn">⏸️</button>
+
+
 
 
 </body>
+
 </html>

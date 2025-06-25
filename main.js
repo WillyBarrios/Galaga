@@ -86,8 +86,30 @@ pauseBtn.addEventListener('click', () => {
         }
     }
 });
+const exitBtn = document.getElementById('exitBtn');
 
+exitBtn.addEventListener('click', () => {
+    if (state.currentGameState === GAME_STATE.PLAYING) {
+        state.showExitConfirm = true;
+        state.isPaused = true;
+        console.log("⚠️ Solicitud de salida iniciada desde botón");
+    }
+});
 
+const btnExitYes = document.getElementById('btnExitYes');
+const btnExitNo = document.getElementById('btnExitNo');
+
+btnExitYes.addEventListener('click', () => {
+    if (state.showExitConfirm) salirAlMenu();
+});
+
+btnExitNo.addEventListener('click', () => {
+    if (state.showExitConfirm) {
+        state.showExitConfirm = false;
+        state.isPaused = false;
+        document.querySelector('.exit-confirm-buttons').classList.remove('show');
+    }
+});
 btnRestart.addEventListener('click', () => {
     reiniciarJuego();
 });
@@ -546,6 +568,12 @@ function draw() {
         ctx.font = '20px Arial';
         ctx.fillText('Se perderá el progreso actual.', canvas.width / 2, canvas.height / 2);
         ctx.fillText('Presiona Y para confirmar o N para cancelar.', canvas.width / 2, canvas.height / 2 + 40);
+        if (state.showExitConfirm) {
+            document.querySelector('.exit-confirm-buttons').classList.add('show');
+        } else {
+            document.querySelector('.exit-confirm-buttons').classList.remove('show');
+        }
+
         ctx.restore();
     }
     // === Cartel de pausa normal ===
@@ -583,34 +611,54 @@ function draw() {
 
 canvas.addEventListener('mousedown', (event) => {
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+
 
     if (state.currentGameState === GAME_STATE.MENU) {
         const btnJugar = {
             x: canvas.width / 4,
-            y: canvas.height * 0.6,
+            y: canvas.height * 0.45, // ⬅️ Debe coincidir con el `fillRect` de drawMainMenu
             width: canvas.width / 2,
             height: 50
         };
 
         const btnComandos = {
             x: canvas.width / 4,
-            y: canvas.height * 0.7,
+            y: canvas.height * 0.55,
             width: canvas.width / 2,
             height: 50
         };
 
-        if (x >= btnJugar.x && x <= btnJugar.x + btnJugar.width && y >= btnJugar.y && y <= btnJugar.y + btnJugar.height) {
+        const btnCreditos = {
+            x: canvas.width / 4,
+            y: canvas.height * 0.65,
+            width: canvas.width / 2,
+            height: 50
+        };
+
+        if (x >= btnJugar.x && x <= btnJugar.x + btnJugar.width &&
+            y >= btnJugar.y && y <= btnJugar.y + btnJugar.height) {
             sonidoFondo.play();
             startGame(state);
         }
 
-        if (x >= btnComandos.x && x <= btnComandos.x + btnComandos.width && y >= btnComandos.y && y <= btnComandos.y + btnComandos.height) {
+        if (x >= btnComandos.x && x <= btnComandos.x + btnComandos.width &&
+            y >= btnComandos.y && y <= btnComandos.y + btnComandos.height) {
             state.currentGameState = GAME_STATE.COMMANDS;
+        }
+
+        if (x >= btnCreditos.x && x <= btnCreditos.x + btnCreditos.width &&
+            y >= btnCreditos.y && y <= btnCreditos.y + btnCreditos.height) {
+            state.currentGameState = GAME_STATE.CREDITS;
         }
     }
 });
+
+
 
 function salirAlMenu() {
     sonidoFondo.pause();
@@ -633,7 +681,35 @@ function salirAlMenu() {
     state.playerProjectiles.length = 0;
     state.enemies.length = 0;
     state.showExitConfirm = false;
+    document.querySelector('.exit-confirm-buttons')?.classList.remove('show');
+    state.showExitConfirm = false;
+
 }
+canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const btnX = canvas.width / 4;
+    const btnY = canvas.height * 0.8;
+    const btnW = canvas.width / 2;
+    const btnH = 50;
+
+    // ✅ Botón en comandos
+    if (state.currentGameState === GAME_STATE.COMMANDS &&
+        x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
+        state.currentGameState = GAME_STATE.MENU;
+        console.log('🔙 Volver al menú desde comandos');
+    }
+
+    // ✅ Botón en créditos
+    if (state.currentGameState === GAME_STATE.CREDITS &&
+        x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
+        state.currentGameState = GAME_STATE.MENU;
+        console.log('🔙 Volver al menú desde créditos');
+    }
+});
+
 
 function gameLoop() {
     if (state.currentGameState === GAME_STATE.MENU) {
