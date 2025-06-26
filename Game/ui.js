@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-// ui.js
-
-// Importa funciones relacionadas con power-ups
-=======
 // Importamos funciones y variables necesarias del archivo powerups.js
->>>>>>> 7a361470421d8f6559c617b8fc33ffca5e7d4b06
 import { maybeSpawnPowerUpForLevel, powerUps } from './powerups.js';
 
 // Definición de los distintos estados posibles del juego
@@ -18,9 +12,6 @@ export const GAME_STATE = {
 
 // Dibuja el menú principal en el canvas
 export function drawMainMenu(ctx, canvas) {
-<<<<<<< HEAD
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpia el canvas
-=======
 
     ctx.fillStyle = 'black'; // Fondo negro
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -28,7 +19,6 @@ export function drawMainMenu(ctx, canvas) {
     ctx.fillStyle = 'white'; // Texto blanco
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
->>>>>>> 7a361470421d8f6559c617b8fc33ffca5e7d4b06
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height); // Fondo negro
 
@@ -63,15 +53,11 @@ export function drawMainMenu(ctx, canvas) {
     ctx.fillText('VER CRÉDITOS', canvas.width / 2, canvas.height * 0.65 + 35);
 }
 
-<<<<<<< HEAD
-// Dibuja la pantalla de créditos
-=======
 
 // Dibuja la pantalla de créditos del juego
 
 
 
->>>>>>> 7a361470421d8f6559c617b8fc33ffca5e7d4b06
 export function drawCredits(ctx, canvas) {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height); // Fondo negro
